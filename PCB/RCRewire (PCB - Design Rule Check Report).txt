@@ -1,0 +1,61 @@
+Design Rule Check Report
+------------------------
+
+Report File:        C:\Users\u19b90\Documents\GitHub\rc-car\PCB\RCRewire (PCB - Design Rule Check Report).txt
+Report Written:     Friday, May 17, 2019
+Design Path:        C:\Users\u19b90\Documents\GitHub\rc-car\PCB\RCRewire.pcb
+Design Title:       
+Created:            5/3/2019 3:17:03 PM
+Last Saved:         5/17/2019 2:37:57 PM
+Editing Time:       13979 min
+Units:              mil (precision 0)
+
+
+Results
+=======
+
+
+No errors found
+
+
+Settings
+========
+
+
+Spacings
+
+=========
+
+Tracks        Yes
+Pads and Vias Yes
+Shapes        Yes
+Text          Yes
+Board         Yes
+Drills        Yes
+Components    No
+
+
+Manufacturing
+
+==============
+
+Min Drill Hole Size  Yes
+Min Track Width      Yes
+Min Annular Ring     Yes
+Copper Text In Board Yes
+Mirrored Text        Yes
+Routing Areas        Yes
+Drill Breakout       Yes
+
+
+Nets
+
+=====
+
+Net Completion               Yes
+Dangling Tracks              Yes
+Net Track Length Differences No
+
+
+
+End Of Report.
