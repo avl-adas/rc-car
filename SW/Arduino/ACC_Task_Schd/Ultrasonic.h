@@ -10,7 +10,7 @@ private:
     int lastDist[3] = { 9999, 9999, 9999};
 // Base pin number for HC SR04 sensors (added with TRIG and ECHO OFFSETs above)
     int ultrasonicPin;
-    
+    int cnt_outlier = 0;
 
 // Distance at which automatic braking starts
      int brakeDist;
@@ -84,11 +84,23 @@ int Ultrasonic::getDistance(){
 
 int Ultrasonic::getAverageDistance(){
     int tempDist = getDistance();
-    if((tempDist<2)||(tempDist>400))
+
+
+    if(tempDist > 400)
     {
+      cnt_outlier++;
+      if(cnt_outlier > 5)
+      {
+     tempDist = lastDist[0] = lastDist[1] = lastDist [2] = 80;
+      
+      cnt_outlier = 0;
+      }
+    }
+    
+    if((tempDist<2)||(tempDist>400))
+    {      
       tempDist = (lastDist[0] + lastDist[1] + lastDist[2])/3;
     }
-
   
     // Store last 3
     lastDist[0] = lastDist[1];

@@ -24,7 +24,7 @@ const int THROTTLE_IN_PIN = 3;
 const int STEERING_IN_PIN = 2;
 const int S_MOTOR_PIN = 12;
 const int ULTRASONIC_FRONT = 48 ;//car 1 is 54; car 2 is 48
-const int ULTRASONIC_BACK = 56;
+const int ULTRASONIC_LEFT = 56;
 const int ULTRASONIC_RIGHT = 64;
 
 //Channel 3 (VR) and Channel 4 (SW)
@@ -72,15 +72,23 @@ const int PWM_FUDGE = 25; // us
 
 bool pinUltrasonicState;
 bool pinUltrasonicState_r;
-int DistF;
+bool pinUltrasonicState_l;
+int DistF = 0;// Dist are for debugging
+int DistR = 0;
+int DistL = 0;
+int avgDist;
 int avgDistF;
 int avgDistFL;
 int avgDistFR;
-
+int 
 unsigned long tUltrasonicStart;
 unsigned long tUltrasonicEnd;
 unsigned long tUltrasonicStart_r;
 unsigned long tUltrasonicEnd_r;
+unsigned long tUltrasonicStart_l;
+unsigned long tUltrasonicEnd_l;
+
+int steer_cmd_pi = 0;
 
 // Updated 6/10/2016 F. Dang /////////////////////////////
 // Raspi - Arduino Serial Commands
@@ -118,6 +126,7 @@ Semaphore sem_PWM = FREE;      // Semaphore to disable pwm output
 
 Ultrasonic frontUltrasonic = Ultrasonic(ULTRASONIC_FRONT, sem_PWM);
 Ultrasonic rightUltrasonic = Ultrasonic(ULTRASONIC_RIGHT, sem_PWM);
+Ultrasonic leftUltrasonic = Ultrasonic(ULTRASONIC_LEFT, sem_PWM);
 
 //Wireless Communication
 #include <SPI.h>
@@ -244,19 +253,30 @@ void ACC_Func_Handler() { //running every 25ms
     //[1000 2000] 1500 means 0 speed
   }
   else {
-    //DistF = frontUltrasonic.getDistance();
-    avgDistFL = frontUltrasonic.getAverageDistance();
+    DistF = frontUltrasonic.getDistance();
+    DistL = leftUltrasonic.getDistance();
+    DistR = rightUltrasonic.getDistance();
+    avgDistFL = leftUltrasonic.getAverageDistance();
     avgDistFR = rightUltrasonic.getAverageDistance();
+    avgDistF = frontUltrasonic.getAverageDistance();
 
-    if (avgDistFL > avgDistFR) 
+    if(steer_cmd_pi > 2)
     {
-      avgDistF = avgDistFR;
+    avgDist = min(avgDistF, avgDistFL);
+      
+    }
+    else if(steer_cmd_pi < -2)
+    {
+    avgDist = min(avgDistF, avgDistFR);
     }
     else
     {
-      avgDistF = avgDistFL;
+    avgDist = min(min(avgDistFL,avgDistFR),avgDistF);
     }
-    ACC(avgDistF, 10); //Distance, times of 10ms
+    
+    
+    
+    ACC(avgDist, 10); //Distance, times of 10ms
 
     /*12 26 2018 YSUN - re-map RC car speed range, 1500 + [-500, 500]*/
     //M&A
@@ -282,10 +302,11 @@ void ACC_Func_Handler() { //running every 25ms
   
   //Trigger ultrasonics every 75ms
   ultrasonic_ct++;
-  if(ultrasonic_ct >= 3)
+  if(ultrasonic_ct >= 1)
   {
     frontUltrasonic.readDistance();
     rightUltrasonic.readDistance();
+    leftUltrasonic.readDistance();
     ultrasonic_ct = 0;
   }
 
@@ -353,12 +374,14 @@ void setup()
 
   attachInterrupt(digitalPinToInterrupt((frontUltrasonic.getPin()) + frontUltrasonic.getEchoOffset()), ultrasonicChange, CHANGE);
   attachInterrupt(digitalPinToInterrupt((rightUltrasonic.getPin()) + rightUltrasonic.getEchoOffset()), ultrasonicChange_r, CHANGE);
-
+  attachInterrupt(digitalPinToInterrupt((leftUltrasonic.getPin()) + leftUltrasonic.getEchoOffset()), ultrasonicChange_l, CHANGE);
+ 
   /* Wireless communication */
   radio.begin();
   // Set the PA Level low to prevent power supply related issues since this is a
   // getting_started sketch, and the likelihood of close proximity of the devices. RF24_PA_MAX is default.
-  radio.setPALevel(RF24_PA_LOW);
+  radio.setPALevel(RF24_PA_HIGH);
+  radio.setChannel(80); 
   // Open a writing and reading pipe on each radio, with opposite addresses
   radio.openWritingPipe(addresses[0]);
   radio.openReadingPipe(1, addresses[1]);
@@ -613,6 +636,7 @@ void driveHandler(char packetType, int value) {
       //Serial.print("Steer: "); Serial.println(value);
       //setSteer(1500 + (500/30) * value , 0);                // Steer range: [  -30,  30 ]
       setSteer(90 + (90 / 30 * value) , 0);              // Steer range: [  -30,  30 ]
+      steer_cmd_pi = value;
       break;
     default:
       ;
@@ -664,12 +688,12 @@ void setDrive(int us, int dly) {
 }
 void wireless_communication()
 {
-  payload[0] = (int)(car_speed);
-  payload[1] = (int)(Rel_Pos);
-  payload[2] = (int)(v_cmd);
+  payload[0] = (int)(DistL);
+  payload[1] = (int)(avgDistFL);
+  payload[2] = (int)(DistF);
   payload[3] = (int)(avgDistF);
-  payload[4] = (int)(En_Pos);
-  payload[5] = (int)(motor_PWM);
+  payload[4] = (int)(DistR);
+  payload[5] = (int)(avgDistFR);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
@@ -711,6 +735,25 @@ void ultrasonicChange_r()
   {
     tUltrasonicEnd_r = micros() - tUltrasonicStart_r;
     rightUltrasonic.set_pulse_dur(tUltrasonicEnd_r);
+    //RisingFalling_Toggle = 0;
+  }
+}
+
+
+void ultrasonicChange_l()
+{
+  pinUltrasonicState_l = digitalRead(leftUltrasonic.getPin() + leftUltrasonic.getEchoOffset());
+
+  if (pinUltrasonicState_l)
+  {
+    tUltrasonicStart_l = micros();
+    //Rising_Toggle++;
+    //RisingFalling_Toggle = 1;
+  }
+  else
+  {
+    tUltrasonicEnd_l = micros() - tUltrasonicStart_l;
+    leftUltrasonic.set_pulse_dur(tUltrasonicEnd_l);
     //RisingFalling_Toggle = 0;
   }
 }
