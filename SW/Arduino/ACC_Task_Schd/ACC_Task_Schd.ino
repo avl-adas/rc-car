@@ -114,6 +114,9 @@ float V_CLC_TRGT = 0;
 float V_CL_TRGT_BUF[5] = {0, 0, 0, 0, 0};
 const unsigned int idx = 0;
 int array_length = 0;
+
+const float batt_thresh = 6.4;
+
 ///////////////////////////////////////////////////////////////////
 
 
@@ -330,6 +333,7 @@ void setup()
   //SerialUSB.begin(14400);
 
   pinMode(OVERRIDE_PIN, INPUT);
+  pinMode(37, OUTPUT);
 
   //Ultrasonic setup use to be
 
@@ -545,6 +549,16 @@ void loop()
     /* Call this every 50 loops */
     wireless_communication();
     loop_ct = 0;
+  if(batt_voltage <= batt_thresh)
+      {
+  
+     digitalWrite(37,HIGH);
+  
+      }
+     else{
+        digitalWrite(37,LOW);
+    
+      }
   }
   
   ct_main++;
