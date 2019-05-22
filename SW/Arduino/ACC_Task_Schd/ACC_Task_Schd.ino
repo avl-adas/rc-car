@@ -80,7 +80,8 @@ int avgDist;
 int avgDistF;
 int avgDistFL;
 int avgDistFR;
-int 
+
+
 unsigned long tUltrasonicStart;
 unsigned long tUltrasonicEnd;
 unsigned long tUltrasonicStart_r;

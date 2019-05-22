@@ -93,6 +93,7 @@ void Vel_Cntrl(){
 void Pos_Cntrl(){
         P_Kp = v_cruise/(d_thres_hi - d_thres_lo);
 	v_cmd = constrain(P_Kp*(Rel_Pos - d_thres_lo), 0 , v_cruise); //+P_Kd*(Rel_Vel);
+
   
 }
 

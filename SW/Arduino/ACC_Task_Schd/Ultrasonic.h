@@ -79,29 +79,22 @@ int Ultrasonic::getEchoOffset()
 }
 
 int Ultrasonic::getDistance(){
+
   return distance;
 }
 
 int Ultrasonic::getAverageDistance(){
     int tempDist = getDistance();
 
-
-    if(tempDist > 400)
+    if (tempDist < 2)
     {
-      cnt_outlier++;
-      if(cnt_outlier > 5)
-      {
-     tempDist = lastDist[0] = lastDist[1] = lastDist [2] = 80;
-      
-      cnt_outlier = 0;
-      }
+      tempDist = 2;
     }
-    
-    if((tempDist<2)||(tempDist>400))
-    {      
-      tempDist = (lastDist[0] + lastDist[1] + lastDist[2])/3;
+    else if(tempDist > 80)
+    {
+      tempDist = 80 + 5;
     }
-  
+     
     // Store last 3
     lastDist[0] = lastDist[1];
     lastDist[1] = lastDist[2];
