@@ -666,7 +666,11 @@ void driveHandler(char packetType, int value) {
 //us [0 180]
 void setSteer(int us, int dly) {
   //steeringChannel.setDuty(us);
-  myservo_steer.write(us);
+  //myservo_steer.write(us);
+  if (us < 180)
+    us = map(us,0,180,1000,2000);
+  
+  us = constrain(us,1000,2000);
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = us;
   delay(dly);
 }
@@ -698,6 +702,10 @@ void setDrive(int us, int dly) {
   */
 //  myservo_drive.writeMicroseconds(us);
 //    myservo_drive.write(us);
+    if (us < 180)
+      us = map(us,0,180,1000,2000);
+  
+    us = constrain(us,1000,2000);
     PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
 //  throttleChannel.setDuty(us);
   delay(dly);
@@ -776,6 +784,9 @@ void ultrasonicChange_l()
 
 void PWM_SERVO_SETUP()
 {
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 2000;                             // Set the PWM duty cycle to center / 10% / 1500 
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 2000;  
+  
     // PWM set-up on pins D38 and D36 for channels 1 and 2 respectively
   REG_PMC_PCER1 |= PMC_PCER1_PID36;                  // Enable PWM 
   REG_PIOC_ABSR |= PIO_ABSR_P6 | PIO_ABSR_P4;        // Set the port C PWM pins to peripheral type B
@@ -790,7 +801,13 @@ void PWM_SERVO_SETUP()
   
   REG_PWM_ENA = PWM_ENA_CHID2 | PWM_ENA_CHID1;                       //Enable PWM channels 1 and 2;
 
-  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;                             // Set the PWM duty cycle to center / 50% / 1500 
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 2000;                             // Set the PWM duty cycle to center / 10% / 1500 
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 2000;  
+  delay(100);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1000;                             // Set the PWM duty cycle to center / 10% / 1500 
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1000;  
+  delay(100);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;                             // Set the PWM duty cycle to center / 10% / 1500 
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
   delay(100);
 }
