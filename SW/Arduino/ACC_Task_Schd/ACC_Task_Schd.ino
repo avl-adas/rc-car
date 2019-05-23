@@ -790,12 +790,6 @@ void PWM_SERVO_SETUP()
   
   REG_PWM_ENA = PWM_ENA_CHID2 | PWM_ENA_CHID1;                       //Enable PWM channels 1 and 2;
 
-  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 2000;                             // Set the PWM duty cycle to center / 50% / 1500 
-  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 2000;  
-  delay(100);
-  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1000;                             // Set the PWM duty cycle to center / 50% / 1500 
-  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1000;  
-  delay(100);
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;                             // Set the PWM duty cycle to center / 50% / 1500 
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
   delay(100);
