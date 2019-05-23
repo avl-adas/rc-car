@@ -97,7 +97,18 @@ void PWM_SERVO_SETUP()
   
   REG_PWM_ENA = PWM_ENA_CHID2 | PWM_ENA_CHID1;                       //Enable PWM channels 1 and 2;
 
+  ARM_ESC(1);  //attempt an arm on pin 38
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;                             // Set the PWM duty cycle to center / 50% / 1500 
-  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;                             // Set the PWM duty cycle to center / 50% / 1500    
-  delay(3000); // 3 seconds of neutral to arm??   
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
+}
+
+void ARM_ESC(int i)
+//Pass the PWM channell (1 = D38, 2 = D36)
+{
+  for(int j = 1000; j <= 338; j += 28)
+  {
+    PWM->PWM_CH_NUM[i].PWM_CDTYUPD = j;
+    delay(100);
+  }
+  PWM->PWM_CH_NUM[i].PWM_CDTYUPD = 1500;
 }
