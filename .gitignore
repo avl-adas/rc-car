@@ -20,3 +20,6 @@ Backup of *.doc*
 
 # SolidWorks Part autosave temporary files
 ~$*.SLDPRT*
+
+# SolidWorks Part autosave temporary files
+~$*.SLDASM*
