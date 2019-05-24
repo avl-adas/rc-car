@@ -81,7 +81,8 @@ int avgDistF;
 int avgDistFL;
 int avgDistFR;
 
-
+int TEMPDEBUG;
+int TEMPDEBUG2;
 unsigned long tUltrasonicStart;
 unsigned long tUltrasonicEnd;
 unsigned long tUltrasonicStart_r;
@@ -326,6 +327,7 @@ void Lane_Keep_Hanlder() {
 
 void setup()
 {
+  PWM_SERVO_SETUP();
   //Serial1.begin(115200);
   //Serial.begin(9600);
   //SerialUSB.begin(9600);
@@ -665,12 +667,14 @@ void driveHandler(char packetType, int value) {
 
 //us [0 180]
 void setSteer(int us, int dly) {
+  TEMPDEBUG = us;
   //steeringChannel.setDuty(us);
   //myservo_steer.write(us);
   if (us <= 180)
     us = map(us,0,180,1000,2000);
   
   us = constrain(us,1000,2000);
+  TEMPDEBUG2 = us;
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = us;
   delay(dly);
 }
@@ -712,9 +716,9 @@ void setDrive(int us, int dly) {
 }
 void wireless_communication()
 {
-  payload[0] = (int)(DistL);
-  payload[1] = (int)(avgDistFL);
-  payload[2] = (int)(DistF);
+  payload[0] = (int)(TEMPDEBUG);
+  payload[1] = (int)(TEMPDEBUG2);
+  payload[2] = (int)(steer_cmd_pi);
   payload[3] = (int)(avgDistF);
   payload[4] = (int)(DistR);
   payload[5] = (int)(avgDistFR);
@@ -784,7 +788,7 @@ void ultrasonicChange_l()
 
 void PWM_SERVO_SETUP()
 {
-    // PWM set-up on pins D38 and D36 for channels 1 and 2 respectively
+    // PWM set-up on pins D38 and D36 for channels 2 and 1 respectively
   REG_PMC_PCER1 |= PMC_PCER1_PID36;                  // Enable PWM 
 
   REG_PWM_CLK = PWM_CLK_PREA(0) | PWM_CLK_DIVA(42);  // Set the PWM clock A rate to 2MHz (84MHz/42)
