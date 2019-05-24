@@ -88,6 +88,9 @@ unsigned long tUltrasonicStart_r;
 unsigned long tUltrasonicEnd_r;
 unsigned long tUltrasonicStart_l;
 unsigned long tUltrasonicEnd_l;
+int str_buf[3] = {0, 0, 0};
+const int us_arb_del = 6;
+
 
 int steer_cmd_pi = 0;
 
@@ -114,7 +117,6 @@ float V_CLC_TRGT = 0;
 float V_CL_TRGT_BUF[5] = {0, 0, 0, 0, 0};
 const unsigned int idx = 0;
 int array_length = 0;
-
 const float batt_thresh = 6.4;
 
 ///////////////////////////////////////////////////////////////////
@@ -264,12 +266,12 @@ void ACC_Func_Handler() { //running every 25ms
     avgDistFR = rightUltrasonic.getAverageDistance();
     avgDistF = frontUltrasonic.getAverageDistance();
 
-    if(steer_cmd_pi > 2)
+    if(steer_cmd_pi > 3)
     {
     avgDist = min(avgDistF, avgDistFL);
       
     }
-    else if(steer_cmd_pi < -2)
+    else if(steer_cmd_pi < -3)
     {
     avgDist = min(avgDistF, avgDistFR);
     }
@@ -326,6 +328,7 @@ void Lane_Keep_Hanlder() {
 
 void setup()
 {
+  PWM_SERVO_SETUP();
   //Serial1.begin(115200);
   //Serial.begin(9600);
   //SerialUSB.begin(9600);
@@ -650,8 +653,21 @@ void driveHandler(char packetType, int value) {
     case 'S':
       //Serial.print("Steer: "); Serial.println(value);
       //setSteer(1500 + (500/30) * value , 0);                // Steer range: [  -30,  30 ]
+  
+      str_buf[0] = str_buf[1];
+      str_buf[1] = str_buf[2];
+      str_buf[2] = value;
+      
       setSteer(90 + (90 / 30 * value) , 0);              // Steer range: [  -30,  30 ]
-      steer_cmd_pi = value;
+      if(str_buf[2] - str_buf[1] < us_arb_del)           // condition to select left or right ultrasonic
+      {
+          steer_cmd_pi = str_buf[2];
+      }
+      else
+      {
+          steer_cmd_pi = (str_buf[0] + str_buf[1] + str_buf[2])/3;
+      }
+      
       break;
     default:
       ;
@@ -666,7 +682,10 @@ void driveHandler(char packetType, int value) {
 //us [0 180]
 void setSteer(int us, int dly) {
   //steeringChannel.setDuty(us);
-  myservo_steer.write(us);
+  //myservo_steer.write(us);
+  if (us <= 180)
+    us = map(us,0,180,540,2380);
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = us;
   delay(dly);
 }
 
@@ -696,19 +715,23 @@ void setDrive(int us, int dly) {
     Serial.println(DistF);
   */
 //  myservo_drive.writeMicroseconds(us);
-    myservo_drive.write(us);
+//    myservo_drive.write(us);
 
+  if (us <= 180)
+    us = map(us,0,180,1000,2000);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
+  
 //  throttleChannel.setDuty(us);
   delay(dly);
 }
 void wireless_communication()
 {
-  payload[0] = (int)(DistL);
-  payload[1] = (int)(avgDistFL);
-  payload[2] = (int)(DistF);
-  payload[3] = (int)(avgDistF);
-  payload[4] = (int)(DistR);
-  payload[5] = (int)(avgDistFR);
+  payload[0] = (int)(avgDistFL);
+  payload[1] = (int)(avgDistF);
+  payload[2] = (int)(avgDistFR);
+  payload[3] = (int)(motor_PWM);
+  payload[4] = (int)(v_cmd);
+  payload[5] = (int)(100);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
@@ -771,4 +794,30 @@ void ultrasonicChange_l()
     leftUltrasonic.set_pulse_dur(tUltrasonicEnd_l);
     //RisingFalling_Toggle = 0;
   }
+}
+
+void PWM_SERVO_SETUP()
+{
+    // PWM set-up on pins D38 and D36 for channels 1 and 2 respectively
+  REG_PMC_PCER1 |= PMC_PCER1_PID36;                  // Enable PWM 
+
+  REG_PWM_CLK = PWM_CLK_PREA(0) | PWM_CLK_DIVA(42);  // Set the PWM clock A rate to 2MHz (84MHz/42)
+  
+
+  PWM->PWM_CH_NUM[1].PWM_CMR = PWM_CMR_CALG | PWM_CMR_CPRE_CLKA;      // Enable dual slope PWM and set the clock source as CLKA
+  PWM->PWM_CH_NUM[1].PWM_CPRD = 20000;                                // Set the PWM frequency 2MHz/(2 * 20000) = 50Hz;
+  PWM->PWM_CH_NUM[2].PWM_CMR = PWM_CMR_CALG | PWM_CMR_CPRE_CLKA;      // Enable dual slope PWM and set the clock source as CLKA
+  PWM->PWM_CH_NUM[2].PWM_CPRD = 20000;                                // Set the PWM frequency 2MHz/(2 * 20000) = 50Hz;
+  
+  REG_PWM_ENA = PWM_ENA_CHID2 | PWM_ENA_CHID1;                        //Enable PWM channels 1 and 2;
+  
+  delay(1);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set initial PWM
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
+  delay(3000);                                  // Give ESC time to reset after pins reset to low
+  REG_PIOC_ABSR |= PIO_ABSR_P6 | PIO_ABSR_P4;   // Set the port C PWM pins to peripheral type B
+  REG_PIOC_PDR  |= PIO_PDR_P6 | PIO_PDR_P4;     // Set the port C PWM pins to outputs
+  delay(250);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set the PWM duty cycle to center / 50% / 1500 
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
 }
