@@ -81,8 +81,7 @@ int avgDistF;
 int avgDistFL;
 int avgDistFR;
 
-int TEMPDEBUG;
-int TEMPDEBUG2;
+
 unsigned long tUltrasonicStart;
 unsigned long tUltrasonicEnd;
 unsigned long tUltrasonicStart_r;
@@ -667,14 +666,10 @@ void driveHandler(char packetType, int value) {
 
 //us [0 180]
 void setSteer(int us, int dly) {
-  TEMPDEBUG = us;
   //steeringChannel.setDuty(us);
   //myservo_steer.write(us);
   if (us <= 180)
-    us = map(us,0,180,1000,2000);
-  
-  us = constrain(us,1000,2000);
-  TEMPDEBUG2 = us;
+    us = map(us,0,180,540,2380);
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = us;
   delay(dly);
 }
@@ -706,26 +701,26 @@ void setDrive(int us, int dly) {
   */
 //  myservo_drive.writeMicroseconds(us);
 //    myservo_drive.write(us);
-    if (us <= 180)
-      us = map(us,0,180,1000,2000);
+
+  if (us <= 180)
+    us = map(us,0,180,1000,2000);
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
   
-    us = constrain(us,1000,2000);
-    PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
 //  throttleChannel.setDuty(us);
   delay(dly);
 }
 void wireless_communication()
 {
-  payload[0] = (int)(TEMPDEBUG);
-  payload[1] = (int)(TEMPDEBUG2);
-  payload[2] = (int)(steer_cmd_pi);
+  payload[0] = (int)(DistL);
+  payload[1] = (int)(avgDistFL);
+  payload[2] = (int)(DistF);
   payload[3] = (int)(avgDistF);
   payload[4] = (int)(DistR);
   payload[5] = (int)(avgDistFR);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
-  //Ensure Fast write is not called too quickly (minimum 1 ms)
+  //Ensure Fast write is not called too quickly (around 1 ms)
 
 }
 
@@ -788,7 +783,7 @@ void ultrasonicChange_l()
 
 void PWM_SERVO_SETUP()
 {
-    // PWM set-up on pins D38 and D36 for channels 2 and 1 respectively
+    // PWM set-up on pins D38 and D36 for channels 1 and 2 respectively
   REG_PMC_PCER1 |= PMC_PCER1_PID36;                  // Enable PWM 
 
   REG_PWM_CLK = PWM_CLK_PREA(0) | PWM_CLK_DIVA(42);  // Set the PWM clock A rate to 2MHz (84MHz/42)
@@ -802,13 +797,12 @@ void PWM_SERVO_SETUP()
   REG_PWM_ENA = PWM_ENA_CHID2 | PWM_ENA_CHID1;                        //Enable PWM channels 1 and 2;
   
   delay(1);
-  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1580;        // Set initial PWM
-  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1580;  
+  PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set initial PWM
+  PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
   delay(3000);                                  // Give ESC time to reset after pins reset to low
   REG_PIOC_ABSR |= PIO_ABSR_P6 | PIO_ABSR_P4;   // Set the port C PWM pins to peripheral type B
   REG_PIOC_PDR  |= PIO_PDR_P6 | PIO_PDR_P4;     // Set the port C PWM pins to outputs
-  delay(3000);
+  delay(250);
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set the PWM duty cycle to center / 50% / 1500 
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
-  delay(3000);
 }
