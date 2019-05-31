@@ -24,7 +24,7 @@ int Rel_VelOld_2 =0;
 //float Rel_PosVel_3 =0;
 
 const int d_thres_hi = 80;
-const int d_thres_lo = 30;
+const int d_thres_lo = 35;
 int v_cruise = 100; //scaling between [-500 500]
 float P_Kp = 0;// = v_cruise/(d_thres_hi - d_thres_lo);
 float P_Kd = 0;
@@ -86,14 +86,20 @@ void Mode_Selector()
 
 }
 
-void Vel_Cntrl(){
+void Vel_Cntrl(bool brk_flg){
 	v_cmd = v_cruise;
+ 
+ if(brk_flg)
+ {v_cmd=0;}
+ 
 }
 
-void Pos_Cntrl(){
+void Pos_Cntrl(bool brk_flg){
         P_Kp = v_cruise/(d_thres_hi - d_thres_lo);
 	v_cmd = constrain(P_Kp*(Rel_Pos - d_thres_lo), 0 , v_cruise); //+P_Kd*(Rel_Vel);
-
+  
+ if(brk_flg)
+ {v_cmd=0;}
   
 }
 
@@ -132,7 +138,7 @@ void Snsr_Proc(int SnsrRead, int dt){
 }
 
 
-void ACC(int SnsrRead, int dt){
+void ACC(int SnsrRead, int dt, bool brk_flg){
 	Snsr_Proc(SnsrRead,dt);
 	Mode_Selector();
 
@@ -140,10 +146,10 @@ void ACC(int SnsrRead, int dt){
 		v_cmd = 0; //this should be interfaced with manual input
 	}
 	else if(En_Pos){
-		Pos_Cntrl();
+		Pos_Cntrl(brk_flg);
 	}
 	else if(En_Vel){
-		Vel_Cntrl();
+		Vel_Cntrl(brk_flg);
 	}
 
 

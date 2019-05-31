@@ -1,21 +1,23 @@
 #ifndef _ULTRASONIC_H_
 #define _ULTRASONIC_H_
 
+const int pos_uS_delta = 10;
+
 //Ultrasonic_sensor
 class Ultrasonic{
 private:
     const int TRIG_OFFSET = 0;
     const int ECHO_OFFSET = 1;
     long distance;
-    int lastDist[3] = { 9999, 9999, 9999};
+    int lastDist[3] = { 201, 201, 201};
 // Base pin number for HC SR04 sensors (added with TRIG and ECHO OFFSETs above)
     int ultrasonicPin;
-    int cnt_outlier = 0;
 
 // Distance at which automatic braking starts
      int brakeDist;
     unsigned long dur_ultraSonic_pulse;
     Semaphore sem_PWM;
+    int avg_uS = 0;
 public: 
     Ultrasonic(int pin, Semaphore &sem_PWM_in);
     int readDistance();
@@ -94,12 +96,22 @@ int Ultrasonic::getAverageDistance(){
     {
       tempDist = 80 + 5;
     }
-     
+
     // Store last 3
     lastDist[0] = lastDist[1];
     lastDist[1] = lastDist[2];
-    lastDist[2] = tempDist;
     
+  
+    if ((tempDist > lastDist[2]) && (tempDist - avg_uS > pos_uS_delta))
+    {
+      lastDist[2] = avg_uS + pos_uS_delta;   
+    }
+    else
+    {
+      lastDist[2] = tempDist;
+    }
+
+    avg_uS = (lastDist[0] + lastDist[1] + lastDist[2])/3;
     // average
   return (lastDist[0] + lastDist[1] + lastDist[2])/3;
     

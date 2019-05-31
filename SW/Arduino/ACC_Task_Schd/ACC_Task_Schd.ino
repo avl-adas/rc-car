@@ -88,6 +88,9 @@ unsigned long tUltrasonicStart_r;
 unsigned long tUltrasonicEnd_r;
 unsigned long tUltrasonicStart_l;
 unsigned long tUltrasonicEnd_l;
+int str_buf[3] = {0, 0, 0};
+const int us_arb_del = 6;
+
 
 int steer_cmd_pi = 0;
 
@@ -114,7 +117,6 @@ float V_CLC_TRGT = 0;
 float V_CL_TRGT_BUF[5] = {0, 0, 0, 0, 0};
 const unsigned int idx = 0;
 int array_length = 0;
-
 const float batt_thresh = 6.4;
 
 ///////////////////////////////////////////////////////////////////
@@ -252,10 +254,10 @@ void ACC_Func_Handler() { //running every 25ms
   if (manual_flag) {
 //    setDrive(SET_SPEED, 0);
   }
-  else if (brake_flag) {
+  /*else if (brake_flag) {
     setDrive(1500, 0); //[0 180] due to servo.h module, 90 means 0 speed
     //[1000 2000] 1500 means 0 speed
-  }
+  }*/
   else {
     DistF = frontUltrasonic.getDistance();
     DistL = leftUltrasonic.getDistance();
@@ -264,14 +266,17 @@ void ACC_Func_Handler() { //running every 25ms
     avgDistFR = rightUltrasonic.getAverageDistance();
     avgDistF = frontUltrasonic.getAverageDistance();
 
-    if(steer_cmd_pi > 2)
+    if(steer_cmd_pi > 3)
     {
     avgDist = min(avgDistF, avgDistFL);
-      
+    if (avgDistFR <= (d_thres_lo-10))
+        avgDist = min(avgDist, avgDistFR);
     }
-    else if(steer_cmd_pi < -2)
+    else if(steer_cmd_pi < -3)
     {
     avgDist = min(avgDistF, avgDistFR);
+    if (avgDistFL <= (d_thres_lo-10))
+        avgDist = min(avgDist, avgDistFL);
     }
     else
     {
@@ -280,7 +285,7 @@ void ACC_Func_Handler() { //running every 25ms
     
     
     
-    ACC(avgDist, 10); //Distance, times of 10ms
+    ACC(avgDist, 10, brake_flag); //Distance, times of 10ms
 
     /*12 26 2018 YSUN - re-map RC car speed range, 1500 + [-500, 500]*/
     //M&A
@@ -651,8 +656,21 @@ void driveHandler(char packetType, int value) {
     case 'S':
       //Serial.print("Steer: "); Serial.println(value);
       //setSteer(1500 + (500/30) * value , 0);                // Steer range: [  -30,  30 ]
+  
+      str_buf[0] = str_buf[1];
+      str_buf[1] = str_buf[2];
+      str_buf[2] = value;
+      
       setSteer(90 + (90 / 30 * value) , 0);              // Steer range: [  -30,  30 ]
-      steer_cmd_pi = value;
+      if(str_buf[2] - str_buf[1] < us_arb_del)           // condition to select left or right ultrasonic
+      {
+          steer_cmd_pi = str_buf[2];
+      }
+      else
+      {
+          steer_cmd_pi = (str_buf[0] + str_buf[1] + str_buf[2])/3;
+      }
+      
       break;
     default:
       ;
@@ -711,12 +729,12 @@ void setDrive(int us, int dly) {
 }
 void wireless_communication()
 {
-  payload[0] = (int)(DistL);
-  payload[1] = (int)(avgDistFL);
-  payload[2] = (int)(DistF);
-  payload[3] = (int)(avgDistF);
-  payload[4] = (int)(DistR);
-  payload[5] = (int)(avgDistFR);
+  payload[0] = (int)(avgDistFL);
+  payload[1] = (int)(avgDistF);
+  payload[2] = (int)(avgDistFR);
+  payload[3] = (int)(motor_PWM);
+  payload[4] = (int)(v_cmd);
+  payload[5] = (int)(batt_voltage*100);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
