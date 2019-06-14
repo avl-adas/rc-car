@@ -9,13 +9,23 @@ float g_ac = 0;         // grade acceleration
 float car_speed_m  = 0; // car speed in m/s
 float a_newtime = 0;    // new time for acceleration calculation
 float a_oldtime = 0;    // old time for acceleration calculation
+float new_speed = 0;
+float old_speed = 0;
 
-const float cg_h = 10;  // center of gravity height (cm)              ***estimated***
-const float cg_l = 15;  // center of gravity distance from rear wheel ***estimated***
-const float k = 4;      // spring constant for the suspension (N/cm)  ***estimated***
-const float wb = 24;    // wheelbase (cm)                             ***estimated***
-const float m = 1;      // mass (kg)                                  ***estimated***
+const float cg_h = .10;  // center of gravity height (m)                    ***estimated***
+const float cg_l = .15;  // center of gravity distance from rear wheel (m)  ***estimated***
+const float k = .4;      // spring constant for the suspension (N/m)        ***estimated***
+const float wb = .24;    // wheelbase (m)                                   ***estimated***
+const float m = 1;      // mass (kg)                                        ***estimated***
 
+
+float phi = 0;          // pitch angle
+
+float grade_tan = 0;
+float grade_sin = 0;
+
+void Grade_Est()
+{
 float Ff = 0;           // vertical force on the front wheel
 float Fr = 0;           // vertical force on the rear wheel
 float Fa = 0;           // horizontal force from acceleration
@@ -25,28 +35,24 @@ float Ffd = 0;          // front wheel force delta
 float Frd = 0;          // rear wheel force delta
 float F_d = 0;          // Front displacement (cm)
 float R_d = 0;          // Rear displacement  (cm)
-float phi = 0;          // pitch angle
-
-float grade_tan = 0;
-float grade_sin = 0;
-
-void Grade_Est()
-{
-
 /*
-read a
+
 read h_ac
 read v_ac
  
  */
 
-// get vehicle acceleration
+// calculate vehicle acceleration from encoder speed
 // car_speed is in cm/sec
 car_speed_m = car_speed / 100;
 
 a_oldtime = a_newtime;
-a_newtime = micros();
+old_speed = new_speed;
 
+a_newtime = micros();
+new_speed = car_speed_m;
+
+a = (new_speed - old_speed) / (a_newtime - a_oldtime); //vehicle acceleration
 
 
 g_ac = h_ac - a; // calculate grade acceleration
@@ -54,7 +60,12 @@ g_ac = h_ac - a; // calculate grade acceleration
 grade_tan = atan(g_ac / v_ac);
 grade_sin = asin(g_ac / g);
 
+
+
 //Suspension pitch estimation
+
+
+
 Fa = m * a;
 
 Ffb = (m * g * cg_l) / wb;
@@ -69,6 +80,6 @@ Frd = Frb - Fr
 F_d = Ffd * k;
 R_d = Frd * k;
 
-phi = atan((F_d + R_d) / wb);
+phi = atan((F_d + R_d) / wb); //pitch
 
 }
