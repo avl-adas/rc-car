@@ -16,7 +16,7 @@ void battery_feedback()
     // take a number of analog samples and add them up
     if(sample_count < NUM_SAMPLES) 
     {
-        batt_sum += analogRead(A4);
+        batt_sum += analogRead(P_BATLEVEL);
         sample_count++;
         //delay(5);
     }

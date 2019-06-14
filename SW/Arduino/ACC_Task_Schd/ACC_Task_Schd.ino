@@ -6,6 +6,7 @@
 
 #include <Servo.h>
 #include <DueTimer.h>
+#include "pins.h"
 #include "Semaphore.h"
 #include "Ultrasonic.h"
 #include "ACC.h"
@@ -18,23 +19,23 @@ Servo myservo_drive;
 Servo myservo_steer;
 
 //Throttle
-const int THROTTLE_IN_PIN = 3;
+const int THROTTLE_IN_PIN = P_REC_THRTL;
                             const int MOTOR_PIN = 13;
 //Steering
-const int STEERING_IN_PIN = 2;
+const int STEERING_IN_PIN = P_REC_STEER;
 const int S_MOTOR_PIN = 12;
 const int ULTRASONIC_FRONT = 48 ;//car 1 is 54; car 2 is 48
 const int ULTRASONIC_LEFT = 56;
 const int ULTRASONIC_RIGHT = 64;
 
 //Channel 3 (VR) and Channel 4 (SW)
-const int VR_IN_PIN = 5; //channel 3 connected to pin 5
-const int SW_IN_PIN = 6; //channel 4 connected to pin 6
+const int VR_IN_PIN = P_REC_VR; //channel 3 connected to pin 5
+const int SW_IN_PIN = P_REC_SWITCH; //channel 4 connected to pin 6
 
 //we actually dont need an output for these pins, but the class is setup such that we need to provide an output pin here
 const int VR_OUT_PIN = 8;
-const int ESTOP_PIN  = 7;
-                                const int THROTTLE_OUT_PIN = 9;
+
+const int THROTTLE_OUT_PIN = 9;
 const int STEERING_OUT_PIN = 11;
 int SET_VCRUISE = 0; // set the command cruise velocity from input from channel 3
 int SET_STEER = 1500;
@@ -123,22 +124,20 @@ const float batt_thresh = 6.4;
 PwmChannel throttleChannel = PwmChannel(THROTTLE_IN_PIN, THROTTLE_OUT_PIN, true, PWM_FUDGE, PWM_DEADZONE, 2, true);
 PwmChannel steeringChannel = PwmChannel(STEERING_IN_PIN, STEERING_OUT_PIN, false, 0, 0, 1, false);
 PwmChannel setspeedChannel = PwmChannel(VR_IN_PIN, VR_OUT_PIN, false, 0, 0, 1, false);
-PwmChannel estopChannel    = PwmChannel(SW_IN_PIN, ESTOP_PIN, false, 0, 0, 1, false);
+PwmChannel estopChannel    = PwmChannel(SW_IN_PIN, P_ESTOP, false, 0, 0, 1, false);
 
 // Semaphore
 Semaphore sem_PWM = FREE;      // Semaphore to disable pwm output
 
-Ultrasonic frontUltrasonic = Ultrasonic(ULTRASONIC_FRONT, sem_PWM);
-Ultrasonic rightUltrasonic = Ultrasonic(ULTRASONIC_RIGHT, sem_PWM);
-Ultrasonic leftUltrasonic = Ultrasonic(ULTRASONIC_LEFT, sem_PWM);
+Ultrasonic frontUltrasonic = Ultrasonic(P_US_F_T,P_US_F_E, sem_PWM);
+Ultrasonic rightUltrasonic = Ultrasonic(P_US_FR_T,P_US_FR_E, sem_PWM);
+Ultrasonic leftUltrasonic = Ultrasonic(P_US_FL_T,P_US_FL_E, sem_PWM);
 
 //Wireless Communication
 #include <SPI.h>
 #include "RF24.h"
-#define CE 27
-#define CSN 29
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
-RF24 radio(CE, CSN);
+RF24 radio(P_CE, P_CSN );
 /**********************************************************/
 byte addresses[][6] = {"1Node", "2Node"};
 // Used to control whether this node is sending or receiving
@@ -344,8 +343,8 @@ void setup()
   for (int j = 4; j <= 8; ++j)
     pinMode(j, INPUT);
 
-  pinMode(ESTOP_PIN, OUTPUT);
-  digitalWrite(ESTOP_PIN, LOW);
+  pinMode(P_ESTOP, OUTPUT);
+  digitalWrite(P_ESTOP, LOW);
 
 
   //Timer1.initialize(PERIOD_SCALE); // set a timer of length 100000 microseconds (or 0.1 sec - or 10Hz => the led will blink 5 times, 5 cycles of on-and-off, per second)
@@ -378,9 +377,9 @@ void setup()
   attachInterrupt(digitalPinToInterrupt(channelA), encoder, CHANGE);
   attachInterrupt(digitalPinToInterrupt(channelB), encoder, CHANGE);
 
-  attachInterrupt(digitalPinToInterrupt((frontUltrasonic.getPin()) + frontUltrasonic.getEchoOffset()), ultrasonicChange, CHANGE);
-  attachInterrupt(digitalPinToInterrupt((rightUltrasonic.getPin()) + rightUltrasonic.getEchoOffset()), ultrasonicChange_r, CHANGE);
-  attachInterrupt(digitalPinToInterrupt((leftUltrasonic.getPin()) + leftUltrasonic.getEchoOffset()), ultrasonicChange_l, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(frontUltrasonic.getEPin()), ultrasonicChange, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(rightUltrasonic.getEPin()), ultrasonicChange_r, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(leftUltrasonic.getEPin()), ultrasonicChange_l, CHANGE);
  
   /* Wireless communication */
   radio.begin();
@@ -473,11 +472,11 @@ void loop()
 
   //***** estop conditions
   if (estopChannel.getMicroDiff() > 1700 && estopChannel.getMicroDiff() < 2500)
-  { //digitalWrite(ESTOP_PIN, HIGH);
+  { //digitalWrite(P_ESTOP, HIGH);
     //Serial.print("ESTOP!!! Press reset if everything is OK");
   }
   else
-  { digitalWrite(ESTOP_PIN, LOW);
+  { digitalWrite(P_ESTOP, LOW);
   }
   //end ***** estop conditions
  
@@ -727,7 +726,7 @@ void wireless_communication()
 
 void ultrasonicChange()
 {
-  pinUltrasonicState = digitalRead(frontUltrasonic.getPin() + frontUltrasonic.getEchoOffset());
+  pinUltrasonicState = digitalRead(frontUltrasonic.getEPin());
 
   if (pinUltrasonicState)
   {
@@ -746,7 +745,7 @@ void ultrasonicChange()
 
 void ultrasonicChange_r()
 {
-  pinUltrasonicState_r = digitalRead(rightUltrasonic.getPin() + rightUltrasonic.getEchoOffset());
+  pinUltrasonicState_r = digitalRead(rightUltrasonic.getEPin());
 
   if (pinUltrasonicState_r)
   {
@@ -765,7 +764,7 @@ void ultrasonicChange_r()
 
 void ultrasonicChange_l()
 {
-  pinUltrasonicState_l = digitalRead(leftUltrasonic.getPin() + leftUltrasonic.getEchoOffset());
+  pinUltrasonicState_l = digitalRead(leftUltrasonic.getEPin());
 
   if (pinUltrasonicState_l)
   {
@@ -800,8 +799,8 @@ void PWM_SERVO_SETUP()
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set initial PWM
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
   delay(3000);                                  // Give ESC time to reset after pins reset to low
-  REG_PIOC_ABSR |= PIO_ABSR_P6 | PIO_ABSR_P4;   // Set the port C PWM pins to peripheral type B
-  REG_PIOC_PDR  |= PIO_PDR_P6 | PIO_PDR_P4;     // Set the port C PWM pins to outputs
+  REG_PIOD_ABSR |= PIO_ABSR_P7 | PIO_ABSR_P8;   // Set the port C PWM pins to peripheral type B
+  REG_PIOD_PDR  |= PIO_PDR_P7 | PIO_PDR_P8;     // Set the port C PWM pins to outputs
   delay(250);
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set the PWM duty cycle to center / 50% / 1500 
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  

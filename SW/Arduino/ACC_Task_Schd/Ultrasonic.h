@@ -4,12 +4,11 @@
 //Ultrasonic_sensor
 class Ultrasonic{
 private:
-    const int TRIG_OFFSET = 0;
-    const int ECHO_OFFSET = 1;
     long distance;
     int lastDist[3] = { 9999, 9999, 9999};
 // Base pin number for HC SR04 sensors (added with TRIG and ECHO OFFSETs above)
-    int ultrasonicPin;
+    int ultrasonicTPin;
+    int ultrasonicEPin;
     int cnt_outlier = 0;
 
 // Distance at which automatic braking starts
@@ -17,9 +16,10 @@ private:
     unsigned long dur_ultraSonic_pulse;
     Semaphore sem_PWM;
 public: 
-    Ultrasonic(int pin, Semaphore &sem_PWM_in);
+    Ultrasonic(int pinT,int pinE, Semaphore &sem_PWM_in);
     int readDistance();
-    int getPin();
+    int getTPin();
+    int getEPin();
     int getDistance();
     int getAverageDistance();
     int getEchoOffset();
@@ -28,13 +28,14 @@ public:
 
 
 //Constructor
- Ultrasonic::Ultrasonic(int pin, Semaphore &sem_PWM_in){
+ Ultrasonic::Ultrasonic(int pinT,int pinE, Semaphore &sem_PWM_in){
   
-   ultrasonicPin = pin;
+   ultrasonicTPin = pinT;
+   ultrasonicEPin = pinE;
    sem_PWM = sem_PWM_in;
   
-   pinMode(TRIG_OFFSET + pin, OUTPUT);
-   pinMode(ECHO_OFFSET + pin, INPUT);
+   pinMode(ultrasonicTPin, OUTPUT);
+   pinMode(ultrasonicEPin, INPUT);
  
  }
 
@@ -47,12 +48,12 @@ public:
   interrupts();
 
 //  noInterrupts();
-  digitalWrite(TRIG_OFFSET + ultrasonicPin, LOW);  // Added this line
+  digitalWrite(ultrasonicTPin, LOW);  // Added this line
   delayMicroseconds(2); // Added this line
-  digitalWrite(TRIG_OFFSET + ultrasonicPin, HIGH);
+  digitalWrite(ultrasonicTPin, HIGH);
 //  delayMicroseconds(1000); - Removed this line
   delayMicroseconds(12); // Added this line
-  digitalWrite(TRIG_OFFSET + ultrasonicPin, LOW);
+  digitalWrite(ultrasonicTPin, LOW);
   // int duration2 = pulseIn(ECHO_OFFSET + ultrasonicPin, HIGH,10000);
 
   duration = dur_ultraSonic_pulse;
@@ -69,13 +70,13 @@ void Ultrasonic::set_pulse_dur(unsigned long dur){
 
 
 //Returns ultrasonics pin number
-int Ultrasonic::getPin(){
-  return ultrasonicPin;
+int Ultrasonic::getTPin(){
+  return ultrasonicTPin;
 }
 
-int Ultrasonic::getEchoOffset()
+int Ultrasonic::getEPin()
 {
-  return ECHO_OFFSET;
+  return ultrasonicEPin;
 }
 
 int Ultrasonic::getDistance(){

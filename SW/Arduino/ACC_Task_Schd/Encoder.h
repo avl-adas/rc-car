@@ -1,8 +1,8 @@
 // Encoder pin setup and variable initialization
 #define INT_LENGTH 4
-const byte channelA = 23;
-const byte channelB = 25;
-const byte enc_index = 30;
+const byte channelA = P_ENCODER_A;
+const byte channelB = P_ENCODER_B;
+const byte enc_index = P_ENCODER_I;
 volatile boolean chA = 0;
 
 volatile boolean enc_left = false;
