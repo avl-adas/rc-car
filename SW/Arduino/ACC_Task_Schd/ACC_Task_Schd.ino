@@ -799,8 +799,8 @@ void PWM_SERVO_SETUP()
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set initial PWM
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
   delay(3000);                                  // Give ESC time to reset after pins reset to low
-  REG_PIOD_ABSR |= PIO_ABSR_P7 | PIO_ABSR_P8;   // Set the port C PWM pins to peripheral type B
-  REG_PIOD_PDR  |= PIO_PDR_P7 | PIO_PDR_P8;     // Set the port C PWM pins to outputs
+  REG_PIOC_ABSR |= PIO_ABSR_P6 | PIO_ABSR_P4;   // Set the port C PWM pins to peripheral type B
+  REG_PIOC_PDR  |= PIO_PDR_P6 | PIO_PDR_P4;     // Set the port C PWM pins to outputs
   delay(250);
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = 1500;        // Set the PWM duty cycle to center / 50% / 1500 
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = 1500;  
