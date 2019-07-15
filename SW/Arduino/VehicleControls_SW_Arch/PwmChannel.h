@@ -4,11 +4,15 @@
 
 //#include "Semaphore.h"
 
+// PWM pulse widths +/- PWM_DEADZONE are ignored
+const int PWM_DEADZONE = 30; // us
+const int PWM_FUDGE = 25; // us
+
 class PwmChannel{
 
 private:
   struct PwmChannelData {
-    int channelPin = 3;
+    int channel_InputPin;
     unsigned long microlow = 0; 
     unsigned long microhigh = 0;
     unsigned long microdiff = 0;
@@ -28,7 +32,7 @@ private:
     unsigned long oldDutyRequest = 0;
     unsigned long outputCounter = 0;
     
-    int motorPin = 13;
+    int channel_OutputPin;
     unsigned long heartbeatCounter = 0;
     const unsigned int minHeartbeat = 2;
     const unsigned long heartbeatPeriod = (minHeartbeat + 1+2) * outputPeriod;
@@ -71,19 +75,19 @@ public:
   
   static void timerISR();
   
-  static void channelISR(int currChannel);
-  static void channelISR0(){channelISR(0);}
-  static void channelISR1(){channelISR(1);}
-  static void channelISR2(){channelISR(2);}
-  static void channelISR3(){channelISR(3);}
+  static void channelISR (int currChannel);
+  static void channelISR0() {  channelISR(0);  }
+  static void channelISR1() {  channelISR(1);  }
+  static void channelISR2() {  channelISR(2);  }
+  static void channelISR3() {  channelISR(3);  }
 
   void (*channelISR_arr[4])() = {channelISR0, channelISR1, channelISR2, channelISR3};
 
   void setDuty(int duty_ms);
 
-  int getChannelNum(){return channelNum;}
-  int getMicroDiff(){return channelData[channelNum].microdiff;}
-  int getDutyOutput(){return channelData[channelNum].oldDutyOutput;}
+  int getChannelNum() { return channelNum;  }
+  int getMicroDiff()  { return channelData[channelNum].microdiff; }
+  int getDutyOutput() { return channelData[channelNum].oldDutyOutput; }
 };
 
 
@@ -94,19 +98,17 @@ bool PwmChannel::deadman = false;
 bool PwmChannel::override_completeAutonomous = false;
 bool PwmChannel::override_throttleForward = false;
 bool PwmChannel::override_throttleReverse = false;
+
 PwmChannel::PwmChannelData PwmChannel::channelData[MAX_NUM_CHANNELS];
 
-
-
-
 // Constructor
-PwmChannel::PwmChannel(int pin, int motorIn, bool isThrottle, int fudge, int dead, int scale, bool deadmanUsedIn){
+PwmChannel::PwmChannel(int pin, int motorIn, bool isThrottle, int fudge, int dead, int scale, bool deadmanUsedIn)
+{
   channelNum = numChannels++;
-
   PwmChannelData* currChannel = (PwmChannelData*)(&channelData[channelNum]);
 
-  currChannel->channelPin = pin;
-  currChannel->motorPin = motorIn;
+  currChannel->channel_InputPin = pin;
+  currChannel->channel_OutputPin = motorIn;
   currChannel->isThrottleObject = isThrottle;
   currChannel->pwmFudge = fudge;
   currChannel->pwmDeadzone = dead;
@@ -117,10 +119,8 @@ PwmChannel::PwmChannel(int pin, int motorIn, bool isThrottle, int fudge, int dea
   digitalWrite(motorIn, LOW);
 }
 
-
-
-
-void PwmChannel::initAndSetSemaphore(Semaphore &sem_PWM_in){
+void PwmChannel::initAndSetSemaphore(Semaphore &sem_PWM_in)
+{
 //  numChannels = 0;
   sem_PWM = sem_PWM_in;
 //  deadman = false;
@@ -143,7 +143,7 @@ void PwmChannel::channelISR(int currChannel)    // Channel 1 = throttle, 2 = ste
 
 //  if (override_completeAutonomous == false ){ //&& throttleOverride == false){
     
-    if (digitalRead(channelData[currChannel].channelPin) == HIGH)
+    if (digitalRead(channelData[currChannel].channel_InputPin) == HIGH)
     {
         channelData[currChannel].microlow = micros();
         channelData[currChannel].heartbeat++;
@@ -157,6 +157,7 @@ void PwmChannel::channelISR(int currChannel)    // Channel 1 = throttle, 2 = ste
       // Calculate new positive pulse width
       channelData[currChannel].microdiff = channelData[currChannel].microhigh - channelData[currChannel].microlow + channelData[currChannel].pwmFudge;      
       //newDutyRequest = microdiff / PERIOD_SCALE;
+      
       if (channelData[currChannel].microdiff > 1500 + channelData[currChannel].pwmDeadzone)
       {
         channelData[currChannel].newDutyRequest = ((((int)channelData[currChannel].microdiff - channelData[currChannel].pwmDeadzone) - 1500) / channelData[currChannel].pwmScaleFactor + 1500) / PERIOD_SCALE;
@@ -237,7 +238,7 @@ void PwmChannel::timerISR()
   
     // Check for turn off
     if (channelData[currChannel].outputCounter >= currDutyOutput){
-      digitalWrite(channelData[currChannel].motorPin, LOW);
+      digitalWrite(channelData[currChannel].channel_OutputPin, LOW);
       //Serial.println(oldDutyOutput);
   
       sem_PWM = FREE;   // Free semaphore
@@ -252,7 +253,7 @@ void PwmChannel::timerISR()
         return;
       }
       sem_PWM = HELD;   // Grab semaphore
-      digitalWrite(channelData[currChannel].motorPin, HIGH);
+      digitalWrite(channelData[currChannel].channel_OutputPin, HIGH);
       channelData[currChannel].outputCounter = 0;
     }
   
@@ -268,7 +269,7 @@ void PwmChannel::timerISR()
       if (channelData[currChannel].heartbeatCounter >= channelData[currChannel].heartbeatPeriod){
         if (channelData[currChannel].heartbeat < (channelData[currChannel].minHeartbeat * 2)){
            channelData[currChannel].oldDutyOutput = channelData[currChannel].oldDutyRequest = DUTY_IDLE;// / 50;
-           digitalWrite(channelData[currChannel].motorPin, LOW);
+           digitalWrite(channelData[currChannel].channel_OutputPin, LOW);
            Serial.print("H"); Serial.print(currChannel);
         }
         channelData[currChannel].heartbeatCounter = 0;

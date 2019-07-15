@@ -1,22 +1,25 @@
+#ifndef _BATTERY_VOLTAGE_H_
+#define _BATTERY_VOLTAGE_H_
 
 // Battery protection variables
 #define NUM_SAMPLES 100
+const int BATTERY_INPUT = A4;
+const uint8_t LOW_BATTERY_INDICATOR = 37;
+const float BATTERY_MAX_VOLTAGE = 7.4F;
+const float BATTERY_LOW_THRESHOLD = 6.8F;
 int batt_sum = 0;                    // sum of samples taken
-unsigned char sample_count = 0; // current sample number
+unsigned char sample_count = 0;      // current sample number
 float batt_voltage = 0.0;            // calculated voltage
-float batt_voltage_raw = 0.0;            // calculated voltage raw
-float batt_limit = 6.8;
+float batt_voltage_raw = 0.0;        // calculated voltage raw
 unsigned char batt_call = 0U;
-
 float test;
-
 
 void battery_feedback()
 {
     // take a number of analog samples and add them up
     if(sample_count < NUM_SAMPLES) 
     {
-        batt_sum += analogRead(A4);
+        batt_sum += analogRead(BATTERY_INPUT);
         sample_count++;
         //delay(5);
     }
@@ -42,15 +45,6 @@ void battery_feedback()
 
       //Serial.print(batt_voltage);
       //Serial.println (" V");
-    }
-  
-
-
-
-
-  
-  
-
-
-    
+    }   
 }
+#endif
