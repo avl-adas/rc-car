@@ -1,7 +1,6 @@
-#ifndef _WIRELESS_COMM_H_
-#define _WIRELESS_COMM_H_
-
-#include "wireless_comm.h"
+#include <arduino.h>
+#include "Wireless_Comm.h"
+#include "Wireless_Data.h"
 
 void wireless_comm_setup()
 {
@@ -21,16 +20,16 @@ void wireless_comm_setup()
 
 void wireless_communication()
 {
-  payload[0] = (int)(avgDistFL);
-  payload[1] = (int)(avgDistF);
-  payload[2] = (int)(avgDistFR);
-  payload[3] = (int)(motor_PWM);
-  payload[4] = (int)(v_cmd);
-  payload[5] = (int)(batt_voltage*100);
+  
+  payload[0] = (int)(CAR_MODE);
+  payload[1] = (int)(avgDist);
+  payload[2] = (int)(REF_Speed);
+  payload[3] = (int)(CUR_Speed);
+  payload[4] = (int)(batt_voltage*100);
+  payload[5] = (int)(FB_PWM);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
   //Ensure Fast write is not called too quickly (around 1 ms)
-}
 
-#endif
+}

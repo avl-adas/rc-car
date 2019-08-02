@@ -1,29 +1,9 @@
 #ifndef _ULTRASONIC_H_
 #define _ULTRASONIC_H_
 
-const uint8_t ULTRASONIC_FRONT = 48 ;//car 1 is 54; car 2 is 48
-const uint8_t ULTRASONIC_LEFT = 56;
-const uint8_t ULTRASONIC_RIGHT = 64;
-const uint8_t pos_uS_delta = 10;
+#include "Semaphore.h"
 
-bool pinUltrasonicState;
-bool pinUltrasonicState_r;
-bool pinUltrasonicState_l;
-
-// used in ACC_func and also wireless comm
-float avgDistF;
-float avgDistFL;
-float avgDistFR;
-float avgDist;
-
-unsigned long tUltrasonicStart;
-unsigned long tUltrasonicEnd;
-unsigned long tUltrasonicStart_r;
-unsigned long tUltrasonicEnd_r;
-unsigned long tUltrasonicStart_l;
-unsigned long tUltrasonicEnd_l;
-
-//Ultrasonic_sensor
+// //Ultrasonic_sensor
 class Ultrasonic
 {
   private:
@@ -55,4 +35,5 @@ void ultrasonicChange();
 void ultrasonicChange_r();
 void ultrasonicChange_l();
 void ultrasonic_distances();
+
 #endif

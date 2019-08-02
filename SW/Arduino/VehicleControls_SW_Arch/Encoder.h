@@ -22,11 +22,11 @@ unsigned long speed_loop_end = 0;
 unsigned long speed_loop_delay = 0;
 
 //const float PI = 3.14;
-const float REAR_DIFF_RADIUS = 3.0;   // rear differential radius in cm
-const float DRIVE_SHAFT_RADIUS = 1.5; // drive shaft radius in cm where the encoder is connected
-const float DRIVE_BELT_EFF = 0.95;
-const float TIRE_RADIUS = 3.7;        // tire radius in cm
-const float SPEED_FILTER_WT = 0.75; //Yue Sun 12/27/2018 - 
+const float REAR_DIFF_RADIUS = 3.0F;   // rear differential radius in cm
+const float DRIVE_SHAFT_RADIUS = 1.5F; // drive shaft radius in cm where the encoder is connected
+const float DRIVE_BELT_EFF = 0.95F;
+const float TIRE_RADIUS = 3.7F;        // tire radius in cm
+const float SPEED_FILTER_WT = 0.75F; //Yue Sun 12/27/2018 - 
 
 // Encoder Functions
 void encoder_setup();  // PIN Initialization

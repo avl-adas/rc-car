@@ -1,4 +1,7 @@
+#include <arduino.h>
 #include "Ultrasonic.h"
+#include "Ultrasonic_Data.h"
+
 
 void ultrasonic_setup()
 {
@@ -16,7 +19,7 @@ void ultrasonic_setup()
  }
 
 //Main run method from original program
- int Ultrasonic::readDistance() 
+ uint8_t Ultrasonic::readDistance() 
  {
   long duration;
   while (sem_PWM == HELD) Serial.println(sem_PWM);
@@ -34,7 +37,7 @@ void ultrasonic_setup()
   // int duration2 = pulseIn(ECHO_OFFSET + ultrasonicPin, HIGH,10000);
 
   duration = dur_ultraSonic_pulse;
-  distance = (duration/2) / 29.1;
+  distance = (duration/2) / 29.1F;
 
   noInterrupts();
   sem_PWM = FREE;
@@ -140,21 +143,23 @@ void ultrasonicChange_l()
 
 void ultrasonic_distances()
 {
+  frontUltrasonic.readDistance();
+  rightUltrasonic.readDistance();
+  leftUltrasonic.readDistance();
   avgDistFL = leftUltrasonic.getAverageDistance();
   avgDistFR = rightUltrasonic.getAverageDistance();
   avgDistF = frontUltrasonic.getAverageDistance();
-
   // steer_cmd_pi coming from Lateral control function
   if(steer_cmd_pi > 3)
   {
     avgDist = min(avgDistF, avgDistFL);
-    if (avgDistFR <= (d_thres_lo-10))
+    if (avgDistFR <= (DIST_TO_OBSTACLE_LO-10))
         { avgDist = min(avgDist, avgDistFR);  }
   }
   else if(steer_cmd_pi < -3)
   {
     avgDist = min(avgDistF, avgDistFR);
-    if (avgDistFL <= (d_thres_lo-10))
+    if (avgDistFL <= (DIST_TO_OBSTACLE_LO-10))
         { avgDist = min(avgDist, avgDistFL);  }
   }
   else
