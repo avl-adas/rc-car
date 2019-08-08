@@ -1,0 +1,34 @@
+const int calib_axis = 2;
+float xi;
+float yi;
+float xiyi;
+float sqxi;
+const int g = 256;
+const int n = 500;
+float scaling;
+float zeroffset;
+int i = 0;
+float correcta;
+int mult;
+
+
+// calibration
+  //calib_axis; // change value 0 for x, 1 for y, 2 for z, orient accordingly
+  
+  // using least square method to find scaling and offsets y  = scaling*x + offset
+  for ( i = 0; i < n+1 ; i++){
+                //compensate_sensor_errors();
+		xiyi += accel[calib_axis]*g ;
+                xi   += accel[calib_axis];
+                yi   += g ; 
+                sqxi += accel[calib_axis]*accel[calib_axis];
+                Serial.print("Wait for Calibration \n");
+  	};
+  scaling = (n * xiyi - xi*yi)/(n * sqxi - xi*xi);
+  zeroffset = (yi - scaling * xi)/n;
+    
+  Serial.print("\t scale:");    Serial.print(scaling,4);
+  Serial.print("\t OffS:");     Serial.print(zeroffset,4);
+
+
+Serial.print(scaling*accel[0]+zeroffset);            Serial.print("\t "); 
