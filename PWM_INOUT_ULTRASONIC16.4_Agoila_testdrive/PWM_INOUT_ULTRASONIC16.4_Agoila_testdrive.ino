@@ -6,10 +6,10 @@
 
 //Throttle
 const int THROTTLE_IN_PIN = 8;//3;
-const int MOTOR_PIN = 36;//13;
+const int MOTOR_PIN = 38;//13;
 //Steering
 const int STEERING_IN_PIN = 7;//2;
-const int S_MOTOR_PIN = 38;//12;
+const int S_MOTOR_PIN = 36;//12;
 const int ULTRASONIC_FRONT = 54;
 const int ULTRASONIC_BACK = 56;
 
