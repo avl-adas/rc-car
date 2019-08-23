@@ -3,25 +3,19 @@
 
 void Lane_Keep_Handler() 
 {
-   db_lane_keep = 1;
    serialEvent();
 }
 
 void setSteer(int us, int dly) 
 {
-  //Serial.println("setSteer() ");
-  //steeringChannel.setDuty(us);
-  //myservo_steer.write(us);
-
-  // Constants
   if (us <= 180)
     us = map(us,0,180,540,2380);
   PWM->PWM_CH_NUM[2].PWM_CDTYUPD = us;
   delay(dly);
 }
+
 void serialEvent() 
 {
-  db_serial_event = 1;
   if (Serial.available() && byte_index < 14)
   {
     IncomingByteTmp = Serial.read();
@@ -66,7 +60,7 @@ void driveHandler(char packetType, int value)
     case 'D': // Forward
       	if (value > 50 && value < 150) 
       	{ //honored speed command
-        	pi_speed_cmd = value + 10;
+        	pi_speed_cmd = value * 1.1;
       	}
       	else 
       	{	// What if the 

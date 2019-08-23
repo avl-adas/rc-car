@@ -72,40 +72,30 @@ float encoder_speed_feedback()
       enc_count = 0;
       enc_count_old = 0;
   }
-  //Serial.println(enc_count);
-  //noInterrupts();   // Disable interrupts
+  
   // calc drive shaft movement in angles
   movement_angles_ds = (360.0/256.0)*(float)enc_count;   
-  //Serial.println(movement_angles_ds);
   
   // calc rear differential movement in angles     
   movement_angles_rd = movement_angles_ds * (DRIVE_SHAFT_RADIUS / REAR_DIFF_RADIUS) * DRIVE_BELT_EFF;
-  //Serial.println(movement_angles_rd);
+  
   // calc wheel movement in centimetres
   new_dist = (movement_angles_rd / 360.0F) * 2 * 3.14 * TIRE_RADIUS;
-  //Serial.println(new_dist);
-  //Serial.println(old_dist);
+  
   speed_loop_end = micros()/1000;
   speed_loop_delay = speed_loop_end - speed_loop_start;
-  //Serial.println(speed_loop_delay);
+  
   if( abs(new_dist - old_dist) <= 0.01F)
   {
     raw_car_speed = 0.0F;
-    //Serial.println("IF is TRUE");
   }
   else
   {
     raw_car_speed = (new_dist - old_dist)/( ((newTime - oldTime) + speed_loop_delay) * 0.001 );   // in cm/sec
-    //Serial.println(raw_car_speed);
   }
-    //Serial.println(raw_car_speed);
+  
   car_speed = raw_car_speed * SPEED_FILTER_WT + car_speed * (1 - SPEED_FILTER_WT);
-  //Serial.println(car_speed);
-  //Serial.println(newTime);
-  //Serial.println(oldTime);
-  //interrupts();   // Enable interrupts
   speed_loop_start = micros()/1000;
- 
   old_dist = new_dist;
   enc_count_old = enc_count;
   return car_speed;

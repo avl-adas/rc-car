@@ -15,6 +15,7 @@ const float PI_POS_SAT =  100.0F;
 const float PI_NEG_SAT = -100.0F;
 const float MOTOR_PWM_MAX = 1750.0F;
 const float MOTOR_PWM_MIN = 1250.0F;
+float DELTA_TIME = 0.025F;
 
 // Speed Control
 float motor_PWM = 0.0F;
@@ -34,9 +35,7 @@ const float HARD_BRAKE = 0.0F; 	 // in cm/sec
 
 void Speed_Control(float );
 void ACC_Func_Handler();
-// void ACC_function(float , int sample_time, bool pi_brake_flag);
 
-//Undecided
 void Sensor_read(float , float );
 void Mode_Selector();
 float speed_command_arbitration(float , float );

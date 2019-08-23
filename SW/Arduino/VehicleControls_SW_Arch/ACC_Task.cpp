@@ -3,11 +3,12 @@
 #include "Ultrasonic.h"
 #include "ACC_Task_Data.h"
 
+// For debugging purposes on wifi
 float REF_Speed;
 float CUR_Speed;
 float FF_PWM;
 float FB_PWM;
-unsigned long acc_task_speed;
+unsigned long acc_task_speed;  // ACC task execution speed
 
 void ACC_Func_Handler() 
 {   //running every 25ms
@@ -118,7 +119,14 @@ void Speed_Control(float reference_speed)
 	static uint8_t ff_arr_len = sizeof(ff_target_PWM) / sizeof(float);
 	ff_pwm = feedforward_pwm(reference_speed, ff_arr_len);
   FF_PWM = ff_pwm;    // BROADCAST
-  
+  if (reference_speed > 0)
+  {
+    DELTA_TIME = 0.05;
+  }
+  else
+  {
+    DELTA_TIME = 1.0F;
+  }
 	speed_error = reference_speed - current_speed;
 	if ( (speed_error < 1.0F) && (speed_error > -1.0F)) 
   {
@@ -129,12 +137,12 @@ void Speed_Control(float reference_speed)
   
   if (!intgl_wind_up)
   {
-    intgl_term += speed_error * KI; // * delta_time;
+    intgl_term += speed_error * KI * DELTA_TIME; // * delta_time;
   }
   
   fb_pwm = prop_term + intgl_term;
 
-if (fb_pwm > PI_POS_SAT)
+  if (fb_pwm > PI_POS_SAT)
   {
     // fb_pwm is positively saturated
     fb_pwm = PI_POS_SAT;
@@ -221,12 +229,9 @@ float Position_Control(float ultraSonic_data)
 
 void setDrive(int us, int dly) 
 {
-  //Serial.println("setDrive() ");
   if (us <= 180)
     us = map(us,0,180,1000,2000);
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
-  
-//  throttleChannel.setDuty(us);
   delay(dly);
 }
 

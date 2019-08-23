@@ -1,8 +1,6 @@
 #ifndef _LANE_CONTROL_H_
 #define _LANE_CONTROL_H_
 
-int db_lane_keep = 0;
-int db_serial_event = 0;
 // Lane Control
 // Raspi - Arduino Serial Commands
 const char SOP = '{';

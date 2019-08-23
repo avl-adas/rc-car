@@ -98,7 +98,6 @@ float Ultrasonic::getAverageDistance()
     return avg_uS;
 }
 
-
 void ultrasonicChange()
 {
   pinUltrasonicState = digitalRead(frontUltrasonic.getPin() + frontUltrasonic.getEchoOffset());
