@@ -90,7 +90,7 @@ void ObstacleDetection(int rows, int cols, Mat &obs_frame)
     //cout << "all area sum:" << area_max << endl;
     cout << "largest area:" << largest_area << endl;
 
-    if(largest_area > 150)
+    if(largest_area > 500)
     {
 
 	ObstacleFlag = 1;

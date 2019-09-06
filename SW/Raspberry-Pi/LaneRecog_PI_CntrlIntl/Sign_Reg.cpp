@@ -48,22 +48,22 @@ HSV lower: (160, 100, 100)
 HSV higher:(179, 255, 255)
 */
 
-int filtLowHGO = 40;
-int filtHighHGO = 100;
+int filtLowHGO = 50;
+int filtHighHGO = 70;
 
-int filtLowSGO = 100;
+int filtLowSGO = 170;
 int filtHighSGO = 255;
 
-int filtLowVGO = 50;
+int filtLowVGO = 170;
 int filtHighVGO = 255;
 
-int filtLowHSTOP = 165; //was 160
-int filtHighHSTOP = 173; // was 179
+int filtLowHSTOP = 155; //was 165 //was 160 //was 15
+int filtHighHSTOP = 180; // was 173 //was 180 //was 40
 
-int filtLowSSTOP = 100;
-int filtHighSSTOP = 255;
+int filtLowSSTOP = 100; // was 100 //was 0
+int filtHighSSTOP = 255; //was 255
 
-int filtLowVSTOP = 100;
+int filtLowVSTOP = 100; // was 100 //was 150
 int filtHighVSTOP = 255;
 
 int filtLowH[2] = {filtLowHGO,filtLowHSTOP};
@@ -77,6 +77,7 @@ int filtHighV[2] = {filtHighVGO,filtHighVSTOP};
 int minArea = 20000;//was 10000
 int MinArea = 20000;
 int SignFlag= 0; // 0 for Go , 1 for Stop , and 5 for no traffic light detected
+int Sign_Flag = 0;
 int SignFlagChanged=0;
 Moments frame_moments;
 int currFlagfNum=0;
@@ -86,6 +87,13 @@ Mat src_sign;
 const int ROI_SIGN = 0;
 
 const int ROI_SIGN_HEIGHT = 150;
+
+//Changes for latching = 05/31/2019
+const int thresh_1 = 5;
+const int thresh_2 = 7;
+
+int ct_red_light = 0;
+int ct_non_red_light = 0;
 
 void Sign_Reg_Init(int, void*){
  filtLowH[0] = filtLowHGO;
@@ -353,6 +361,7 @@ void SignReg(Mat frame_hsv,Mat frame){
 			//cout << "Sign Flag  " << SignFlag << endl;
 
 			cout << "Area Found" << areaFound << endl;
+			
 		}
 
         // Dye filtered frame with filter color
@@ -367,11 +376,47 @@ void SignReg(Mat frame_hsv,Mat frame){
         // frame_filtered += currFrameBGR;
 
     }
+
+	if (SignFlag == 1)
+	{
+		if (ct_red_light < thresh_1)
+		{
+			ct_red_light+= 5;
+		}
+			
+		ct_non_red_light = 0;
+	}
+	else
+	{
+		if (ct_red_light > 0)
+		{	
+			ct_red_light--;
+		}
+
+		if (ct_non_red_light < thresh_2)
+		{
+			ct_non_red_light++;
+		}
+	}		
+
+
+	if (ct_red_light >= thresh_1)
+	{
+		Sign_Flag = 1;
+	}
+	else if (ct_non_red_light >= thresh_2)
+	{
+		Sign_Flag = 0;
+	}
+	
         frame_filtered_go += currFrameGo;
 		frame_filtered_stop += currFrameStop;
 		if (SignFlagChanged==0){
 		SignFlag = 5; //Put Sign Flag as 5 meaning that it didn't recognized a sign
 		}
+
+	cout << "counter red light" << ct_red_light << endl;
+	cout << "counter non-red light" << ct_non_red_light << endl;
 
 
 	/*

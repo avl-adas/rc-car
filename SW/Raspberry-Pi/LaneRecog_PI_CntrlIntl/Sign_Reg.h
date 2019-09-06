@@ -62,9 +62,17 @@ extern int filtHighVSTOP;
 extern int minArea;
 extern int MinArea;
 extern int SignFlag;
+extern int Sign_Flag;
 
 extern const int ROI_SIGN;
 extern const int ROI_SIGN_HEIGHT;
+
+// logic for latching on stop light - 05/31/2019
+extern const int thresh_1;
+extern const int thresh_2;
+
+extern int ct_red_light;
+extern int ct_non_red_light;
 
 extern Mat src_sign;
 

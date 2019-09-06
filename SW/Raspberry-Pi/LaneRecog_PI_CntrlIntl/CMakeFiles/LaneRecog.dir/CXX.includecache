@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.cpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.cpp
 Sign_Reg.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.h
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.h
 opencv2/core/core.hpp
 -
 opencv2/imgproc/imgproc.hpp
@@ -28,11 +28,11 @@ iostream
 cmath
 -
 opencv2/calib3d/calib3d.hpp
-/home/pi/LaneRecog_PI_CntrlIntl_V21/opencv2/calib3d/calib3d.hpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/opencv2/calib3d/calib3d.hpp
 opencv2/features2d/features2d.hpp
-/home/pi/LaneRecog_PI_CntrlIntl_V21/opencv2/features2d/features2d.hpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/opencv2/features2d/features2d.hpp
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/TaskScheduling_PI.cpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/TaskScheduling_PI.cpp
 stdio.h
 -
 time.h
@@ -52,45 +52,45 @@ unistd.h
 raspicam/raspicam_cv.h
 -
 lane_recog.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.h
 Sign_Reg.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.h
 decision_making.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.h
 obstacle_detection.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.h
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/cntrl_limits.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/cntrl_limits.h
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.cpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.cpp
 stdio.h
 -
 math.h
 -
 decision_making.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.h
 lane_recog.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.h
 cntrl_limits.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/cntrl_limits.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/cntrl_limits.h
 Sign_Reg.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.h
 obstacle_detection.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.h
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.h
 string
 -
 fstream
 -
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.cpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.cpp
 lane_recog.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.h
 tuple
 -
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.h
 string
 -
 fstream
@@ -98,7 +98,7 @@ fstream
 omp.h
 -
 decision_making.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.h
 opencv2/core/core.hpp
 -
 opencv2/imgproc/imgproc.hpp
@@ -116,11 +116,11 @@ vector
 iostream
 -
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.cpp
+/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.cpp
 obstacle_detection.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.h
 
-/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.h
 opencv2/core/core.hpp
 -
 opencv2/imgproc/imgproc.hpp
@@ -138,7 +138,7 @@ iostream
 cmath
 -
 lane_recog.h
-/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.h
+/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.h
 
 /usr/local/include/opencv/cxcore.h
 opencv2/core/core_c.h

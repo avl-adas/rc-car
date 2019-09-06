@@ -4,11 +4,11 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/pi/LaneRecog_PI_CntrlIntl_V21/Sign_Reg.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V21/CMakeFiles/LaneRecog.dir/Sign_Reg.cpp.o"
-  "/home/pi/LaneRecog_PI_CntrlIntl_V21/TaskScheduling_PI.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V21/CMakeFiles/LaneRecog.dir/TaskScheduling_PI.cpp.o"
-  "/home/pi/LaneRecog_PI_CntrlIntl_V21/decision_making.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V21/CMakeFiles/LaneRecog.dir/decision_making.cpp.o"
-  "/home/pi/LaneRecog_PI_CntrlIntl_V21/lane_recog.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V21/CMakeFiles/LaneRecog.dir/lane_recog.cpp.o"
-  "/home/pi/LaneRecog_PI_CntrlIntl_V21/obstacle_detection.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V21/CMakeFiles/LaneRecog.dir/obstacle_detection.cpp.o"
+  "/home/pi/LaneRecog_PI_CntrlIntl_V25/Sign_Reg.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V25/CMakeFiles/LaneRecog.dir/Sign_Reg.cpp.o"
+  "/home/pi/LaneRecog_PI_CntrlIntl_V25/TaskScheduling_PI.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V25/CMakeFiles/LaneRecog.dir/TaskScheduling_PI.cpp.o"
+  "/home/pi/LaneRecog_PI_CntrlIntl_V25/decision_making.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V25/CMakeFiles/LaneRecog.dir/decision_making.cpp.o"
+  "/home/pi/LaneRecog_PI_CntrlIntl_V25/lane_recog.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V25/CMakeFiles/LaneRecog.dir/lane_recog.cpp.o"
+  "/home/pi/LaneRecog_PI_CntrlIntl_V25/obstacle_detection.cpp" "/home/pi/LaneRecog_PI_CntrlIntl_V25/CMakeFiles/LaneRecog.dir/obstacle_detection.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

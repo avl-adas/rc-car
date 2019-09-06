@@ -24,7 +24,7 @@ void *TaskSched10ms(void *arg)
 {	while(1){
 		trackingLogic();
 
-		ObstacleDetection(my_image.rows, my_image.cols, my_image);
+		//ObstacleDetection(my_image.rows, my_image.cols, my_image);
 		//imshow("BBoxes", my_image);
 
 		usleep(50000);//send steering cmd every 100 ms	was 50000

@@ -145,10 +145,10 @@ int lane_width_far_lft = FRAME_WIDTH/4;
 int lane_width_far_rt = FRAME_WIDTH/4;
 int lane_width_near = FRAME_WIDTH/4;
 int lane_width_far_lft_ROI2 = FRAME_WIDTH/6;
-int lane_width_far_rt_ROI2 = FRAME_WIDTH/6;
+int lane_width_far_rt_ROI2 = FRAME_WIDTH/7;
 
-int del_min_dist_sgl_ln_s = 75;
-int del_min_dist_sgl_ln_ROI2_s = 75;
+int del_min_dist_sgl_ln_s = 100;
+int del_min_dist_sgl_ln_ROI2_s = 100;
 
 unsigned int lane_enum_ROI1 = 0; 	// 0 - No lane or Double lane decided by ROI1, 1 - Right, 2 - left
 //Yue Sun Jan-9-2017
@@ -156,11 +156,17 @@ unsigned int lane_enum_ROI1 = 0; 	// 0 - No lane or Double lane decided by ROI1,
 int lane_width_near_min = -FRAME_WIDTH/5;
 int lane_width_near_max =  FRAME_WIDTH*6/5;
 
+int lane_width_near_min_roi2 = 0;
+int lane_width_near_max_roi2 = 0;
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 //Signal///////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Mat src, src_gray;
+Mat src, src_gray, src_hls;
+Mat mask_hls;
+//Mat src_tmp;
+Mat src_tmp2, src_tmp3;
 Mat dst, detected_edges, detected_edges_orig, detected_edge_up_roi, detected_edge_obs_roi, detected_edge_low_roi;
 
 Mat src_hsv;
@@ -204,6 +210,11 @@ int lane_reg_buf_index = 0;
 
 float lane_reg_flt_x = CENTER_COR_X;
 float lane_reg_flt_x2 = CENTER_COR_X;
+
+float lane_reg_flt_x_old = CENTER_COR_X;
+float lane_reg_flt_x2_old = CENTER_COR_X;
+
+float lane_assignment_midpt2 = 0.0f;
 
 
 
@@ -288,10 +299,10 @@ Mat masked_image(){
 
 	Mat mask_source = Mat::zeros( detected_edges.size(), detected_edges.type() ) ;
         //resize(mask_source, mask_source, Size(FRAME_WIDTH, FRAME_HEIGHT), 1,1);	
-	Point mask_pt1(max((del_x_mult/4)*FRAME_WIDTH,0.0f), FRAME_HEIGHT); 
+	Point mask_pt1(max((del_x_mult/4)*FRAME_WIDTH,0.0f), 3*FRAME_HEIGHT/4); 
 	Point mask_pt2(max((FRAME_WIDTH/16 + (del_x_mult/2)*FRAME_WIDTH),0.0f),ROI_Height); // was 1/8
 	Point mask_pt3(min((15*(FRAME_WIDTH)/16 + (del_x_mult/2)*FRAME_WIDTH), float(FRAME_WIDTH)),ROI_Height); // was 7/8
-	Point mask_pt4(min((FRAME_WIDTH + (del_x_mult/4)*FRAME_WIDTH), float(FRAME_WIDTH)),FRAME_HEIGHT);
+	Point mask_pt4(min((FRAME_WIDTH + (del_x_mult/4)*FRAME_WIDTH), float(FRAME_WIDTH)), 3*FRAME_HEIGHT/4);
 	//define point array to store all contour points
 	Point mask_pt_ary[1][4];
 	
@@ -356,6 +367,16 @@ Mat masked_image_roi3(){
 	return mask_source;
 	
 }
+
+//Mat mask_white_lines( Mat my_im ){
+
+//	Mat mask = Mat::zeros(my_im.size(), my_im.type());
+
+	//was 145, 145, 145
+	//was 200, 200, 200 and 255, 255, 255
+	
+//	return mask;
+//}
 
 	
 
@@ -460,21 +481,25 @@ void CannyThreshold(int, void*, Mat &ptr)
 
 	Mat* procSrc;
 
-	//ROI for edge detection
-	//Rect ROI(0,ROI_Y,FRAME_WIDTH,ROI_Height);
 
-	//src = mask_det_edge;
+	//Yue Sun Jan-08 2017, Added to extract ROI of src first, attempting to speed up 
+	/// Convert the image to grayscale
+	//src = src(ROI);
 
-	if (useHsv){
-		procSrc = &hsvChannels[0];
-	} else {
-		//Yue Sun Jan-08 2017, Added to extract ROI of src first, attempting to speed up 
-		/// Convert the image to grayscale
-		//src = src(ROI);
-		cvtColor( src, src_gray, CV_BGR2GRAY );
-		procSrc = & src_gray;
-	}
+	//inRange(src, Scalar(0,0,212), Scalar(131,255,255), mask);
 
+
+	Mat mask1 = Mat::zeros(src.size(), CV_8UC1);
+	//Mat res_tmp = Mat::zeros(src_gray.size(), src_gray.type());
+	cvtColor(src, src_hls, CV_BGR2HLS);
+	inRange(src_hls, Scalar(0, 200, 0), Scalar(180, 255, 255), mask1);
+	//bitwise_and(src, src, src_tmp2, mask1);
+	//cvtColor(src_tmp, res_tmp, CV_BGR2GRAY);
+
+	procSrc = &mask1;
+
+	//imshow("bitwise_and", src_tmp2);
+	imshow("mask", mask1);
 
 	
 	/// Reduce noise with a kernel 3x3
@@ -496,7 +521,7 @@ void CannyThreshold(int, void*, Mat &ptr)
 	/// Was Canny( detected_edges, detected_edges, lowThreshold, lowThreshold*ratio, kernel_size );
 	//Canny( *procSrc, detected_edges, lowThreshold, ratio, kernel_size );
 	Canny( detected_edges, detected_edges, lowThreshold, ratio, kernel_size );
-imshow(debug, detected_edges);
+	imshow(debug, detected_edges);
 
 	del_x_mult = interpol_1d(steer_vals, del_x_vals, sizeof(steer_vals), CntlCom[0]-4);
 
@@ -628,9 +653,6 @@ imshow(debug, detected_edges);
 
 			if (ct_num_rt_det_lanes >= 0 && ct_num_lft_det_lanes >= 0){
 				hl_b_vld_dbl_ln_det = 1;
-				houghThresh = houghthresh_adj_hi_s;
-				cout << "hl double lane detected" << endl;
-				break;
 			}
 
 			if(ct_num_rt_det_lanes == -1 || ct_num_lft_det_lanes == -1){
@@ -746,6 +768,7 @@ imshow(debug, detected_edges);
 		line( dst, Midpt1, Midpt2, Scalar(255), 2);	
 
 		lane_reg_flt_x = Midpt1.x;
+		lane_assignment_midpt2 = Midpt2.x;
 
 
 		//Saturation
@@ -759,6 +782,24 @@ imshow(debug, detected_edges);
 		else{
 		lane_reg_flt_x = x_lane_cross_min;
 		}
+
+
+
+	if (Lpt1.x > 0)
+	{
+		lane_width_near_min_roi2= Lpt1.x; 
+	}
+	else{
+		lane_width_near_min_roi2 = lane_width_near_min;
+	}
+	
+	if (Rpt1.x > 0){
+
+		lane_width_near_max_roi2 = Rpt1.x;	
+	}
+	else{
+		lane_width_near_max_roi2 = lane_width_near_max;
+	}
 
 	
 	Old_lt_pt = Lpt1;
@@ -821,7 +862,7 @@ imshow(debug3, detected_edge_low_roi);
 				if ( (theta < max_Right_Theta && theta > min_Right_Theta) || (theta < max_Left_Theta && theta > min_Left_Theta) ){
 					float hl_pt_x_bottom = (rho-(ROI_Height)*sin(theta))/cos(theta);
 					if (hl_pt_x_bottom <= CENTER_COR_X){
-						if((hl_pt_x_bottom < hl_pt_x_bottom_thrsh[0]) && (hl_pt_x_bottom > lane_width_near_min)){
+						if((hl_pt_x_bottom < hl_pt_x_bottom_thrsh[0]) && (hl_pt_x_bottom >= lane_width_near_min_roi2)){
 							//Further improvement for average calculation for lanes
 							hl_pt_x_bottom_thrsh[0] = hl_pt_x_bottom;// change from original code by comparing the rho, now it is comparing the pt_x bottom value
 							ct_num_lft_det_lanes = k;
@@ -840,7 +881,7 @@ imshow(debug3, detected_edge_low_roi);
 						}
 					}
 					else{
-						if((hl_pt_x_bottom > hl_pt_x_bottom_thrsh[1]) && (hl_pt_x_bottom < lane_width_near_max)){
+						if((hl_pt_x_bottom > hl_pt_x_bottom_thrsh[1]) && (hl_pt_x_bottom <= lane_width_near_max_roi2)){
 							//Further improvement for average calculation for lanes
 							hl_pt_x_bottom_thrsh[1] = hl_pt_x_bottom;// change from original code by comparing the rho, now it is comparing the pt_x bottom value
 							ct_num_rt_det_lanes = k;
@@ -916,7 +957,7 @@ imshow(debug3, detected_edge_low_roi);
 	//Yue Sun 2019-03-27 remove the && condition of ROI1	
 	lane_mode =0;
 	cout<<ct_num_rt_det_lanes<<" "<<ct_num_lft_det_lanes<<endl;
-        if(ct_num_lft_det_lanes == -1 && ct_num_rt_det_lanes >= 0 && lane_enum_ROI1 != 2 )    // Only Right lane was dectected and ROI1 is not left, laneMode=1
+        if(ct_num_lft_det_lanes == -1 && ct_num_rt_det_lanes >= 0 && lane_enum_ROI1 != 2 && lane_reg_flt_x <= lane_assignment_midpt2)    // Only Right lane was dectected and ROI1 is not left and ROI1 center is not left, laneMode=1
         {
 			lane_mode=1;
 	}
@@ -925,7 +966,7 @@ imshow(debug3, detected_edge_low_roi);
 	//else{lane_mode = 0;}
 	cout<<lane_mode;
 
-        if(ct_num_rt_det_lanes == -1 && ct_num_lft_det_lanes >= 0 && lane_enum_ROI1 !=1 )     // Only Left lane was dectected and ROI1 is not right ,laneMode=2
+        if(ct_num_rt_det_lanes == -1 && ct_num_lft_det_lanes >= 0 && lane_enum_ROI1 !=1 && lane_reg_flt_x >= lane_assignment_midpt2)     // Only Left lane was dectected and ROI1 is not right ,laneMode=2
         {
 			lane_mode=2;	
 	}
@@ -1022,6 +1063,18 @@ imshow(debug3, detected_edge_low_roi);
 		}
 		else{
 		lane_reg_flt_x2 = x_lane_cross_min;
+		}
+
+
+
+		if ((Old_lt_pt.x == 0 && Old_rt_pt.x == 0) && (Lpt1.x == 0 && Rpt1.x == 0)){
+			lane_reg_flt_x = lane_reg_flt_x_old;
+			lane_reg_flt_x2 = lane_reg_flt_x2_old;	
+
+		}
+		else{
+			lane_reg_flt_x_old = lane_reg_flt_x;
+			lane_reg_flt_x2_old = lane_reg_flt_x2;
 		}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1231,58 +1284,5 @@ void lane_reg_ct_x_proc(int, void*){
 		
 			cout << "lane_reg_flt_x: " << lane_reg_flt_x << endl;
 		}
-		///////////////////////////////////////////////////////////////////////
 
-	//To Be development
-	/*
-	//end of pointer check
-	if( phl_ptr_curt_loop == MAX_LOOP_NUM ){
-		phl_ptr_curt_loop = 0;//start over for pointer
-	}
-
-	//start check clostest section 
-	for (int sect_i = (MAX_SECT_NUM-1); sect_i >= MIN_SECT_NUM; sect_i --){
-
-		
-
-		//if both lane detected for this section - valid detection
-		if( phl_b_vld_ln_det_sec[sect_i][LEFT_LANE] == 1 && phl_b_vld_ln_det_sec[sect_i][RIGHT_LANE] == 1 ){
-
-			phl_b_vld_ln_det_sec_loop[sect_i][phl_ptr_curt_loop] = 1;//load flag
-
-			phl_pt_x_ct_loop[sect_i][phl_ptr_curt_loop] = phl_pt_x_sect_ct[sect_i];// load center point data
-
-
-		}
-		//else start to search for valid information from previous loop for estimation
-		else{
-			//if section number does not = 0, since sect_0 does not have presious to search
-			if (sect_i > MIN_SECT_NUM){
-				for (int step_j = 1; step_j <= MAX_LOOP_NUM ; step_j++){
-					//if found loop contain valid data
-					if ( phl_b_vld_ln_det_sec_loop[sect_i - step_j][phl_ptr_curt_loop - step_j] == 1 ){
-
-						phl_pt_x_ct_loop[sect_i][phl_ptr_curt_loop] = phl_pt_x_ct_loop[sect_i - step_j][phl_ptr_curt_loop - step_j];
-
-					}
-					else{
-
-					}
-
-				}
-
-
-			}
-			else{
-				//skip for sect_i = 0 since cannot search for data
-			}
-
-		}
-
-	}
-
-	// prepare to next loop data update
-	phl_ptr_curt_loop ++;
-	*/
 }
-

@@ -67,7 +67,7 @@ public:
 		}
 		else
 		{
-			K_tmp[0] = K[0];
+			K_tmp[0] = 0.90*K[0];
 		}
 		
 
@@ -149,14 +149,14 @@ bool txCommand(int command, int value);							// Sends the character command fol
 
 void trackingLogic(void){//10ms
 
-	cout << "Sign Flag  " << SignFlag << endl;
+	cout << "Sign Flag  " << Sign_Flag << endl;
 	cout << "Obstacle Flag " << ObstacleFlag << endl;
 	//check if traffic light is red (Stop)
 	//check if obstacle is detected (Stop)
 // SAS 4/3/2019		
 //	if (SignFlag == 1 || ObstacleFlag == 1 || (LaneFlag1 == 1 && LaneFlag2 == 1))
 
-	if (SignFlag == 1 || ObstacleFlag == 1 ){
+	if (Sign_Flag == 1 || ObstacleFlag == 1 ){
 		CntlCom[IDX_BRAKE] = BrakeLim.max;
 		txCommand(IDX_BRAKE, CntlCom[IDX_BRAKE]);
 		CntlCom[IDX_STEER] = 0.7*xPID.control(X_Target, lane_reg_flt_x, TaskPeriod) + 0.3*xPID2.control(X_Target,lane_reg_flt_x2,TaskPeriod);
