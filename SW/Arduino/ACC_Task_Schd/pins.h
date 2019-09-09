@@ -1,3 +1,6 @@
+#ifndef _PINS_H_
+#define _PINS_H_
+
 /**
  * Setup pins for hardware
  */
@@ -9,7 +12,7 @@
   #define P_ESTOP      A1
   #define P_LED_OK     A2
   #define P_LED_SPR    A3
-  #define P_ENCODER_A  A4 //
+  #define P_ENCODER_A  41 //
   #define P_ENCODER_B  A5 //
   #define P_ENCODER_I  A6 //
   #define P_CE         A7 //
@@ -22,9 +25,9 @@
   #define P_US_B_E     48 //Back E
   #define P_US_RL_T    25 //Rear Left T
   #define P_US_RL_E    50 //Rear Left E
-  #define P_US_F_T     6  //Front T
+  #define P_US_F_T     45  //Front T
   #define P_US_F_E     51 //Front E
-  #define P_US_FR_T    5  //Front Right T
+  #define P_US_FR_T    43 //Front Right T
   #define P_US_FR_E    52 //Front Right E
   #define P_US_FL_T    4  //Left Side T
   #define P_US_FL_E    53 //Left Side E
@@ -42,4 +45,5 @@
   #define P_IMU_SDA    20 //
   #define P_IMU_SCL    21 //
 
+#endif
 #endif
