@@ -2,6 +2,8 @@
 #include <Servo.h>
 #include "Drive.h"
 
+float car_speed_print = 0.0F;
+
 
 Servo steer_servo;
 
@@ -12,6 +14,7 @@ void drive_setup()
   analogWriteFrequency(P_MTR_PWM, PWM_FREQ);
   pinMode(P_MTR_PWM,OUTPUT);
   pinMode(P_SRV_CMD,OUTPUT);
+  
 }
 
 
@@ -40,4 +43,26 @@ int steering_feedback()
   int srv_feedback_angle = map(srv_feedback_raw, 174, 676, 0, 180); //map from voltage to angle
 
   return srv_feedback_angle;
+}
+
+void Drive_Control()
+{
+  int tmp_time = micros()/1e6;
+
+  if(tmp_time%10 > 5)
+  {
+    drive_cmd(20,1);
+  }
+  else
+  {
+    drive_cmd(40,1);
+  }
+  
+  //Serial.print("call");
+  //Serial.print("/n");
+  car_speed_print = encoder_speed_feedback();
+  //Serial.print("/n");
+  
+  //Serial.print(steering_feedback());
+  //Serial.print("/n");
 }

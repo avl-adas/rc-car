@@ -1,8 +1,8 @@
 #ifndef _PINS_H_
 #define _PINS_H_
 
-#define P_ENCODER_A 1
-#define P_ENCODER_B 2
+#define P_ENCODER_A 31
+#define P_ENCODER_B 32
 #define P_ENCODER_I 3
 
 #define P_MTR_PWM 20

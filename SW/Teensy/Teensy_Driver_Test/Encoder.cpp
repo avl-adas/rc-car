@@ -9,8 +9,17 @@ void encoder_setup()
   attachInterrupt(digitalPinToInterrupt(channelB), encoder, CHANGE);  
 }
 
+int cnt_encoder =0;
+
 void encoder()
-{  
+{ 
+  
+  if(cnt_encoder > 10000000)
+  {cnt_encoder = 0;}
+  else{
+  cnt_encoder++;
+  }
+  
   // Read A and B signals
   boolean A_val = digitalRead(channelA);
   boolean B_val = digitalRead(channelB);
@@ -77,7 +86,8 @@ float encoder_speed_feedback()
   // calc drive shaft movement in angles
   movement_angles_ds = (360.0/256.0)*(float)enc_count;   
   //Serial.println(movement_angles_ds);
-  
+
+  movement_angles_pr = movement_angles_ds;
   // calc rear differential movement in angles     
   movement_angles_rd = movement_angles_ds * (DRIVE_SHAFT_RADIUS / REAR_DIFF_RADIUS) * DRIVE_BELT_EFF;
   //Serial.println(movement_angles_rd);
@@ -108,5 +118,7 @@ float encoder_speed_feedback()
  
   old_dist = new_dist;
   enc_count_old = enc_count;
+
+  
   return car_speed;
 }

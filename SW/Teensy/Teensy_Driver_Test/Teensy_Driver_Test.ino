@@ -1,22 +1,29 @@
+#include "Task_Setup.h"
 #include "Drive.h"
-#include <Servo.h>
 
+extern long enc_count;
+extern float movement_angles_pr;
+extern float car_speed_print;
+
+IntervalTimer tmr_Drive_Control;
 
 void setup()
 {
   Serial.begin(9600);
   drive_setup();
+  encoder_setup();
+
+  /* Timer interrupt */
+  tmr_Drive_Control.begin(Drive_Control, 2000000);
 }
 
 
-void loop() 
+void loop()
 {
-  drive_cmd(20,1);
-  delay(5000);
-  drive_cmd(60,1);
-  delay(5000);
+  /* main loop */
   
-    
-  Serial.print(steering_feedback());
-  Serial.print("/n");
+  Serial.println(car_speed_print);
+  
+  //Serial.print("call");
+  //Serial.print("/n");
 }

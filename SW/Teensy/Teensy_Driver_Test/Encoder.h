@@ -3,8 +3,8 @@
 #ifndef _ENCODER_H_
 #define _ENCODER_H_
 
-#include "pins.h"
 
+float movement_angles_pr = 0.0F;
 
 // Encoder Pin Setup
 const byte channelA = P_ENCODER_A;
