@@ -12,7 +12,7 @@ void setup()
   Serial.begin(9600);
   pinMode(LOW_BATTERY_INDICATOR, OUTPUT);
   Timer6.attachInterrupt(ACC_Func_Handler);
-  Timer6.start(25000); // Calls every 15ms
+  Timer6.start(25000); // Calls every 25ms
   Timer7.attachInterrupt(Lane_Keep_Handler);
   Timer7.start(2000); // Calls every 2 ms
   encoder_setup();

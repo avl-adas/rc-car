@@ -8,6 +8,7 @@ float CUR_Speed;
 float PI_Speed;
 float FF_PWM;
 float FB_PWM;
+float MTR_PWM;
 unsigned long acc_task_speed;
 
 void ACC_Func_Handler() 
@@ -19,6 +20,9 @@ void ACC_Func_Handler()
   float raspi_speed = (float)pi_speed_cmd;    // Using a local variable for data integrity
   raspi_speed = map(raspi_speed, -160.0F, 160.0F, -80.0F, 80.0F);
   PI_Speed = raspi_speed;
+
+  //Temporary
+  //CAR_MODE = CRUISE_CONTROL;
   
   switch (CAR_MODE)
   {
@@ -35,6 +39,7 @@ void ACC_Func_Handler()
       {
         reference_speed = HARD_BRAKE;
       }
+
       Speed_Control(reference_speed);
       break;
 
@@ -131,7 +136,7 @@ void Speed_Control(float reference_speed)
   
   if (!intgl_wind_up)
   {
-    intgl_term += speed_error * KI;
+    intgl_term += speed_error * KI * DELTA_TIME;
   }
   
   fb_pwm = prop_term + intgl_term;
@@ -182,7 +187,20 @@ if (fb_pwm > PI_POS_SAT)
 	{
 		// DO NOTHING 
 	}
+
+  if(CAR_MODE == CRUISE_CONTROL)
+  {
+    motor_PWM = constrain(motor_PWM, 1500, 2000);
+  }
+  else if((CAR_MODE == ACC) && reference_speed > 10)
+  {
+    motor_PWM = constrain(motor_PWM, 1450, 2000);
+  }
+  
 	prev_error = speed_error;
+
+  MTR_PWM = motor_PWM;    // BROADCAST
+ 
 	setDrive(motor_PWM, 0);
   // setDrive(1625, 0);
 }
