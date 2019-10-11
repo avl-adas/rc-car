@@ -24,7 +24,7 @@ void loop()
 {
   // put your main code here, to run repeatedly:
   static unsigned long timeout = 0;
-  if(millis() - timeout > 2000)
+  if(millis() - timeout > 500)
   {
     timeout = millis();
     wireless_communication();

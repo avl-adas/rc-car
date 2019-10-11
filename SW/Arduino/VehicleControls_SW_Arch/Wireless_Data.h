@@ -5,6 +5,7 @@ extern float REF_Speed;
 extern float CUR_Speed;
 extern float FF_PWM;
 extern float FB_PWM;
+extern float MTR_PWM;
 extern unsigned long acc_task_speed;
 extern int pi_speed_cmd;
 extern int value;

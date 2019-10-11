@@ -8,6 +8,7 @@ float REF_Speed;
 float CUR_Speed;
 float FF_PWM;
 float FB_PWM;
+float MTR_PWM;
 unsigned long acc_task_speed;  // ACC task execution speed
 
 void ACC_Func_Handler() 
@@ -110,11 +111,17 @@ float feedforward_pwm(float reference_speed, uint8_t ff_arr_len)
 
 void Speed_Control(float reference_speed)
 {
+  
   REF_Speed = reference_speed;  // BROADCAST
 	float speed_error = 0.0F,	prop_term = 0.0F, ff_pwm = 1500.0F, fb_pwm = 0.0F;
 	static float intgl_term = 0, prev_error = 0;
 	static boolean intgl_wind_up = false;
 	float current_speed = encoder_speed_feedback();
+  
+  static float car_spd_msrd[3] = {0.0F,0.0F,0.0F};    /* use two elements of an array to filter car speed */ // AM
+  car_spd_msrd[0] = current_speed;  //AM
+  car_spd_msrd[1] = (car_spd_msrd[0]*cs_fc) + (car_spd_msrd[1] * (1 - cs_fc)); //AM
+  
   CUR_Speed = current_speed;    // BROADCAST
 	static uint8_t ff_arr_len = sizeof(ff_target_PWM) / sizeof(float);
 	ff_pwm = feedforward_pwm(reference_speed, ff_arr_len);
@@ -127,6 +134,9 @@ void Speed_Control(float reference_speed)
   {
     DELTA_TIME = 1.0F;
   }
+	float der_term = KD*((car_spd_msrd[1] - car_spd_msrd[2])/DELTA_TIME); //AM
+  car_spd_msrd[2] = car_spd_msrd[1];
+	
 	speed_error = reference_speed - current_speed;
 	if ( (speed_error < 1.0F) && (speed_error > -1.0F)) 
   {
@@ -139,9 +149,18 @@ void Speed_Control(float reference_speed)
   {
     intgl_term += speed_error * KI * DELTA_TIME; // * delta_time;
   }
-  
-  fb_pwm = prop_term + intgl_term;
 
+
+  if (reference_speed > 0.0F)
+  {
+     fb_pwm = prop_term + intgl_term;
+  }
+  else
+  {
+     /* expecting zero ref speed - dampen the response */
+     fb_pwm = prop_term + intgl_term + der_term;
+  }
+  
   if (fb_pwm > PI_POS_SAT)
   {
     // fb_pwm is positively saturated
@@ -188,6 +207,21 @@ void Speed_Control(float reference_speed)
 	{
 		// DO NOTHING 
 	}
+
+
+  // Limit breaking backlash
+  if(CAR_MODE == CRUISE_CONTROL)
+  {
+    motor_PWM = constrain(motor_PWM, 1500, 2000);
+  }
+  else if((CAR_MODE == ACC) && reference_speed > 10)
+  {
+    motor_PWM = constrain(motor_PWM, 1450, 2000);
+  }
+
+
+ 
+  MTR_PWM = motor_PWM;
 	prev_error = speed_error;
 	setDrive(motor_PWM, 0);
   // setDrive(1625, 0);
@@ -234,4 +268,3 @@ void setDrive(int us, int dly)
   PWM->PWM_CH_NUM[1].PWM_CDTYUPD = us;
   delay(dly);
 }
-

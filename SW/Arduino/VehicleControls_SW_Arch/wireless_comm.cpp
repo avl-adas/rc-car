@@ -21,11 +21,11 @@ void wireless_comm_setup()
 void wireless_communication()
 {
   
-  payload[0] = (int)(CAR_MODE);
-  payload[1] = (int)(avgDist);
-  payload[2] = (int)(REF_Speed);
-  payload[3] = (int)(CUR_Speed);
-  payload[4] = (int)(batt_voltage*100);
+  payload[0] = (int)(REF_Speed);
+  payload[1] = (int)(CUR_Speed);
+  payload[2] = (int)(FB_PWM);
+  payload[3] = (int)(FF_PWM);
+  payload[4] = (int)(MTR_PWM);
   payload[5] = (int)(FB_PWM);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
