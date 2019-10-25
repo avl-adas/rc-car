@@ -94,7 +94,7 @@ float feedforward_pwm(float reference_speed, uint8_t ff_arr_len)
     }
   else
   {
-    for (int i = 0; i < (ff_arr_len - 2); i++)
+    for (int i = 0; i < (ff_arr_len - 1); i++)
     {
       float pwm_slope = 0;
       if ( abs(reference_speed - ff_target_speed[i]) <= 0.01 ) //&& (reference_speed < (ff_target_speed[i]+10)) ) // CHECK 1 - CONDITION STATEMENT
