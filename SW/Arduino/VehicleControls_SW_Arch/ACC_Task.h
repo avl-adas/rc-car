@@ -11,7 +11,7 @@ int ultrasonic_ct = 0;
 // PI Controller Variables
 const float KP = 1.0F;
 const float KI = 1.0F;
-const float KD = 0.0F;  //MJ
+const float KD = 0.0F;  //MJ - since dt of 1.0s is 40 times 0.025s, 0.1 of kd is a modified Kd of 4.
 const float cs_fc = 1.0F;  //MJ
 const float PI_POS_SAT =  100.0F;
 const float PI_NEG_SAT = -100.0F;

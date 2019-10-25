@@ -216,7 +216,11 @@ void Speed_Control(float reference_speed)
   }
   else if((CAR_MODE == ACC) && reference_speed > 10)
   {
-    motor_PWM = constrain(motor_PWM, 1450, 2000);
+    motor_PWM = constrain(motor_PWM, 1460, 2000);
+  }
+  else
+  {
+      motor_PWM = constrain(motor_PWM, 1440, 2000);
   }
 
 
