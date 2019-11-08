@@ -23,8 +23,8 @@ void wireless_communication()
   
   payload[0] = (int)(REF_Speed);
   payload[1] = (int)(CUR_Speed);
-  payload[2] = (int)(FB_PWM);
-  payload[3] = (int)(FF_PWM);
+  payload[2] = (int)(PI_Speed);
+  payload[3] = (int)(PI_Steer_Raw);
   payload[4] = (int)(MTR_PWM);
   payload[5] = (int)(FB_PWM);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE

@@ -32,7 +32,9 @@ const uint8_t REL_VEL_FIL_LEN = 3;
 float Rel_Pos = 0.0F;
 const float DIST_TO_OBSTACLE_HI = 50.0F;
 extern const float DIST_TO_OBSTACLE_LO = 30.0F;
-const float CRUISE_VELOCITY = 60.0F; // in cm/sec
+extern const float CRUISE_VELOCITY = 75.0F; // in cm/sec
+
+
 const float HARD_BRAKE = 0.0F; 	 // in cm/sec
 
 void Speed_Control(float );

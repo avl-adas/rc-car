@@ -1,6 +1,7 @@
 #ifndef _LANE_CONTROL_H_
 #define _LANE_CONTROL_H_
 
+extern const float CRUISE_VELOCITY;
 // Lane Control
 // Raspi - Arduino Serial Commands
 const char SOP = '{';
@@ -18,11 +19,16 @@ int str_buf[3] = {0, 0, 0};   // Steering buffer
 int steer_cmd_pi = 0;         // Used for Ultrasound arbitration
 const uint8_t ULTRASONIC_ARB = 6;     // UltraSonic hysterisis 
 extern int pi_speed_cmd = 200;
+extern const float CRUISE_VELOCITY;
+
+const int K_vcmd_x[5] =   {0,5,10,15,30};
+const float K_vcmd_y[5] = {1.0,1.0,0.9,0.8,0.7};
 
 void Lane_Keep_Handler();
 void setSteer(int , int );
 void serialEvent();
 void driveHandler(char packetType, int value);
+float interp_1d(const int * ,const float * ,unsigned int ,unsigned int);
 
 extern boolean manual_flag;
 extern boolean pi_brake_flag = false; 

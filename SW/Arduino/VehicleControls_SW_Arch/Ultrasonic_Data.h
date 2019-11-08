@@ -1,3 +1,6 @@
+#ifndef _US_DATA_H_
+#define _US_DATA_H_
+
 extern int steer_cmd_pi;
 
 const uint8_t ULTRASONIC_FRONT = 48 ;//car 1 is 54; car 2 is 48
@@ -32,3 +35,5 @@ Ultrasonic frontUltrasonic = Ultrasonic(ULTRASONIC_FRONT, sem_PWM);
 Ultrasonic rightUltrasonic = Ultrasonic(ULTRASONIC_RIGHT, sem_PWM);
 Ultrasonic leftUltrasonic = Ultrasonic(ULTRASONIC_LEFT, sem_PWM);
 
+
+#endif

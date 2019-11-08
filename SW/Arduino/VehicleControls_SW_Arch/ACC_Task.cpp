@@ -3,9 +3,11 @@
 #include "Ultrasonic.h"
 #include "ACC_Task_Data.h"
 
+
 // For debugging purposes on wifi
 float REF_Speed;
 float CUR_Speed;
+float PI_Speed;
 float FF_PWM;
 float FB_PWM;
 float MTR_PWM;
@@ -19,6 +21,7 @@ void ACC_Func_Handler()
 
   float raspi_speed = (float)pi_speed_cmd;    // Using a local variable for data integrity
   raspi_speed = map(raspi_speed, -160.0F, 160.0F, -80.0F, 80.0F);
+  PI_Speed = raspi_speed;
   
   switch (CAR_MODE)
   {
@@ -216,11 +219,11 @@ void Speed_Control(float reference_speed)
   }
   else if((CAR_MODE == ACC) && reference_speed > 10)
   {
-    motor_PWM = constrain(motor_PWM, 1460, 2000);
+    //motor_PWM = constrain(motor_PWM, 1460, 2000);
   }
   else
   {
-      motor_PWM = constrain(motor_PWM, 1440, 2000);
+      //motor_PWM = constrain(motor_PWM, 1440, 2000);
   }
 
 
