@@ -188,13 +188,18 @@ if (fb_pwm > PI_POS_SAT)
 		// DO NOTHING 
 	}
 
+  // Limit breaking backlash
   if(CAR_MODE == CRUISE_CONTROL)
   {
     motor_PWM = constrain(motor_PWM, 1500, 2000);
   }
   else if((CAR_MODE == ACC) && reference_speed > 10)
   {
-    motor_PWM = constrain(motor_PWM, 1450, 2000);
+    //motor_PWM = constrain(motor_PWM, 1460, 2000);
+  }
+  else
+  {
+      //motor_PWM = constrain(motor_PWM, 1440, 2000);
   }
   
 	prev_error = speed_error;

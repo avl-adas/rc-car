@@ -10,7 +10,7 @@ uint8_t CAR_MODE = 1;		// By default we run in CRUISE_CONTROL mode
 int ultrasonic_ct = 0;
 // PI Controller Variables
 const float KP = 1.0F;
-const float KI = 4.0F;
+const float KI = 1.0F;
 const float PI_POS_SAT =  100.0F;
 const float PI_NEG_SAT = -100.0F;
 const float MOTOR_PWM_MAX = 1750.0F;
@@ -35,7 +35,7 @@ const uint8_t REL_VEL_FIL_LEN = 3;
 float Rel_Pos = 0.0F;
 const float DIST_TO_OBSTACLE_HI = 50.0F;
 extern const float DIST_TO_OBSTACLE_LO = 30.0F;
-const float CRUISE_VELOCITY = 60.0F; // in cm/sec
+extern const float CRUISE_VELOCITY = 75.0F; // in cm/sec
 const float HARD_BRAKE = 0.0F; 	 // in cm/sec
 
 void Speed_Control(float );

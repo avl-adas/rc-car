@@ -1,6 +1,8 @@
 #include <arduino.h>
 #include "Lane_Control.h"
 
+float PI_Steer_Raw;
+
 void Lane_Keep_Handler() 
 {
    db_lane_keep = 1;
@@ -64,14 +66,15 @@ void driveHandler(char packetType, int value)
     //not used since PI sends 'D' - Drive
     // We can also map the RasPIs PWM command to cm/sec here itself
     case 'D': // Forward
-      	if (value > 50 && value < 150) 
-      	{ //honored speed command
-        	pi_speed_cmd = value + 10;
-      	}
-      	else 
-      	{	// What if the 
-        	pi_speed_cmd = 130; //Invalid speed command (almost stoped, set to max)
-      	}
+        /*
+        if (value > 50 && value < 150) 
+        { //honored speed command
+          pi_speed_cmd = value * 1.1;
+        }
+        else 
+        { // What if the 
+          pi_speed_cmd = 130; //Invalid speed command (almost stoped, set to max)
+        }*/
       	break;
 
     case 'B':
@@ -90,10 +93,13 @@ void driveHandler(char packetType, int value)
     case 'S':
 		//Serial.print("Steer: "); Serial.println(value);
 		//setSteer(1500 + (500/30) * value , 0);                // Steer range: [  -30,  30 ]
+    pi_speed_cmd = interp_1d(K_vcmd_x,K_vcmd_y,5,abs(value-4))* 0.975 * CRUISE_VELOCITY * 2;
 
 		str_buf[0] = str_buf[1];
 		str_buf[1] = str_buf[2];
 		str_buf[2] = value;
+
+    PI_Steer_Raw = value;
 
    /* Offset addition to fix steering deviation from mid-point */
    value +=-3.5;
@@ -116,4 +122,21 @@ void driveHandler(char packetType, int value)
       ;
       //Serial.print("Error: Unrecognized command: "); Serial.println(packetType);
   }
+}
+
+
+float interp_1d(const int *array_x,const float *array_y,unsigned int size,unsigned int value){
+
+  unsigned int index = value/(array_x[size-1]/(size-1)); /*locate index of value, use integer math to cut residue*/
+
+  if ( index <0 ){
+    return array_y[0]; /*No extropolation beyond the min*/
+  }
+  else if( index < (size-1)){
+    return (    array_y[index] + (array_y[index+1]-array_y[index])/(array_x[index+1]-array_x[index])*(value-array_x[index])   ); /*interpolation*/
+  }
+  else{
+    return array_y[size-1];/*No extropolation beyond the max*/
+  }
+  
 }

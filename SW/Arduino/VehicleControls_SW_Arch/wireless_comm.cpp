@@ -29,10 +29,10 @@ void wireless_communication()
 
   payload[0] = (int)(REF_Speed);
   payload[1] = (int)(CUR_Speed);
-  payload[2] = (int)(FB_PWM);
-  payload[3] = (int)(FF_PWM);
-  payload[4] = (int)(MTR_PWM);
-  payload[5] = (int)(batt_voltage);
+  payload[2] = (int)(PI_Speed);
+  payload[3] = (int)(avgDistFL);
+  payload[4] = (int)(avgDistF);
+  payload[5] = (int)(avgDistFR);
   radio.writeFast( &payload, payloadSize); //WARNING FAST WRITE
   //when using fast write there are three FIFO buffers.
   //If the buffers are filled the 4th request will become blocking.
